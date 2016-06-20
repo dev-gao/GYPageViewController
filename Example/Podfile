@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'GYPageViewController_Example' do
+  pod 'GYPageViewController', :path => '../'
+
+  target 'GYPageViewController_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
