@@ -1,0 +1,27 @@
+{
+  "name": "GYPageViewController",
+  "version": "0.1.0",
+  "summary": "Implementation a page view controller with scroll view. To solve 2 Problems of UIPageViewController and take the place of UIPageViewController.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/GYPageViewController",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "GaoYu": "fightrain@126.com"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/GYPageViewController.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "7.0"
+  },
+  "source_files": "GYPageViewController/Classes/**/*",
+  "dependencies": {
+    "HMSegmentedControl": [
+      "~> 1.5.1"
+    ]
+  }
+}

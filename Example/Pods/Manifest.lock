@@ -1,0 +1,10 @@
+PODS:
+  - HMSegmentedControl (1.5.2)
+
+DEPENDENCIES:
+  - HMSegmentedControl (~> 1.5.2)
+
+SPEC CHECKSUMS:
+  HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
+
+COCOAPODS: 0.39.0
