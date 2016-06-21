@@ -1,11 +1,8 @@
+platform :ios, "7.0"
 use_frameworks!
 
 target 'GYPageViewController_Example' do
-  pod 'GYPageViewController', :path => '../'
+#  pod 'GYPageViewController', :path => '../'
 
-  target 'GYPageViewController_Tests' do
-    inherit! :search_paths
-
-    
-  end
+  pod 'HMSegmentedControl', '~>1.5.2'
 end

@@ -10,17 +10,26 @@
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
-		6003F598195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F596195388D20070C39A /* InfoPlist.strings */; };
-		6003F59A195388D20070C39A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F599195388D20070C39A /* main.m */; };
-		6003F59E195388D20070C39A /* ExampleAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F59D195388D20070C39A /* ExampleAppDelegate.m */; };
-		6003F5A7195388D20070C39A /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5A6195388D20070C39A /* ExampleViewController.m */; };
 		6003F5A9195388D20070C39A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5A8195388D20070C39A /* Images.xcassets */; };
 		6003F5B0195388D20070C39A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F5AF195388D20070C39A /* XCTest.framework */; };
 		6003F5B1195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
-		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
+		73BCC9591D1809CB00F8DFCA /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9561D1809CB00F8DFCA /* ViewController.swift */; };
+		73BCC95A1D1809CB00F8DFCA /* TestChildViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9571D1809CB00F8DFCA /* TestChildViewController.swift */; };
+		73BCC95B1D1809CB00F8DFCA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9581D1809CB00F8DFCA /* AppDelegate.swift */; };
+		73BCC95D1D180A5700F8DFCA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73BCC95C1D180A5700F8DFCA /* Main.storyboard */; };
+		73BCC9671D18164F00F8DFCA /* GYPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9601D18164F00F8DFCA /* GYPageViewController.swift */; };
+		73BCC9681D18164F00F8DFCA /* GYTabPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9611D18164F00F8DFCA /* GYTabPageViewController.swift */; };
+		73BCC9691D18164F00F8DFCA /* UIView+GYPauseAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9621D18164F00F8DFCA /* UIView+GYPauseAnimation.swift */; };
+		73BCC96A1D18164F00F8DFCA /* UIView+RemoveConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9631D18164F00F8DFCA /* UIView+RemoveConstraints.swift */; };
+		73BCC96B1D18164F00F8DFCA /* NSLayoutConstraint+RemoveConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9641D18164F00F8DFCA /* NSLayoutConstraint+RemoveConstraints.swift */; };
+		73BCC96C1D18164F00F8DFCA /* NSArray+RemoveConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9651D18164F00F8DFCA /* NSArray+RemoveConstraints.swift */; };
+		73BCC96D1D18164F00F8DFCA /* UIViewController+ChildController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9661D18164F00F8DFCA /* UIViewController+ChildController.swift */; };
+		73BCC9711D1817A800F8DFCA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73BCC96F1D1817A800F8DFCA /* LaunchScreen.storyboard */; };
+		73BCC9721D1817A800F8DFCA /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73BCC9701D1817A800F8DFCA /* Info.plist */; };
+		DABEFF1BD4D19F08ED9BFFA6 /* Pods_GYPageViewController_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F58BEF09F998562843169A45 /* Pods_GYPageViewController_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,19 +43,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3B42835A9951DB4C27FE47A9 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		0A019E31992714A3D0BA2AF7 /* Pods-GYPageViewController_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GYPageViewController_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-GYPageViewController_Example/Pods-GYPageViewController_Example.release.xcconfig"; sourceTree = "<group>"; };
+		3B42835A9951DB4C27FE47A9 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* GYPageViewController_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GYPageViewController_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		6003F591195388D20070C39A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		6003F595195388D20070C39A /* GYPageViewController-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GYPageViewController-Info.plist"; sourceTree = "<group>"; };
-		6003F597195388D20070C39A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		6003F599195388D20070C39A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		6003F59B195388D20070C39A /* GYPageViewController-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GYPageViewController-Prefix.pch"; sourceTree = "<group>"; };
-		6003F59C195388D20070C39A /* ExampleAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExampleAppDelegate.h; sourceTree = "<group>"; };
-		6003F59D195388D20070C39A /* ExampleAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExampleAppDelegate.m; sourceTree = "<group>"; };
-		6003F5A5195388D20070C39A /* ExampleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
-		6003F5A6195388D20070C39A /* ExampleViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
 		6003F5A8195388D20070C39A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		6003F5AE195388D20070C39A /* GYPageViewController_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GYPageViewController_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F5AF195388D20070C39A /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -54,9 +56,23 @@
 		6003F5B9195388D20070C39A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
-		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		63816B7BDB9D262BF89CFC29 /* Pods-GYPageViewController_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GYPageViewController_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GYPageViewController_Example/Pods-GYPageViewController_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		73BCC9561D1809CB00F8DFCA /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		73BCC9571D1809CB00F8DFCA /* TestChildViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestChildViewController.swift; sourceTree = "<group>"; };
+		73BCC9581D1809CB00F8DFCA /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		73BCC95C1D180A5700F8DFCA /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		73BCC9601D18164F00F8DFCA /* GYPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GYPageViewController.swift; sourceTree = "<group>"; };
+		73BCC9611D18164F00F8DFCA /* GYTabPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GYTabPageViewController.swift; sourceTree = "<group>"; };
+		73BCC9621D18164F00F8DFCA /* UIView+GYPauseAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+GYPauseAnimation.swift"; sourceTree = "<group>"; };
+		73BCC9631D18164F00F8DFCA /* UIView+RemoveConstraints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+RemoveConstraints.swift"; sourceTree = "<group>"; };
+		73BCC9641D18164F00F8DFCA /* NSLayoutConstraint+RemoveConstraints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+RemoveConstraints.swift"; sourceTree = "<group>"; };
+		73BCC9651D18164F00F8DFCA /* NSArray+RemoveConstraints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSArray+RemoveConstraints.swift"; sourceTree = "<group>"; };
+		73BCC9661D18164F00F8DFCA /* UIViewController+ChildController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+ChildController.swift"; sourceTree = "<group>"; };
+		73BCC96F1D1817A800F8DFCA /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		73BCC9701D1817A800F8DFCA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B0EE2A99C99DC3F41B5C4F67 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		E67BEEE8A37DE3966F311912 /* GYPageViewController.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = GYPageViewController.podspec; path = ../GYPageViewController.podspec; sourceTree = "<group>"; };
+		E67BEEE8A37DE3966F311912 /* GYPageViewController.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = GYPageViewController.podspec; path = ../GYPageViewController.podspec; sourceTree = "<group>"; };
+		F58BEF09F998562843169A45 /* Pods_GYPageViewController_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GYPageViewController_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +83,7 @@
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
+				DABEFF1BD4D19F08ED9BFFA6 /* Pods_GYPageViewController_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +100,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		202E1818D1C05E3739CAB204 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				63816B7BDB9D262BF89CFC29 /* Pods-GYPageViewController_Example.debug.xcconfig */,
+				0A019E31992714A3D0BA2AF7 /* Pods-GYPageViewController_Example.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
@@ -91,6 +117,7 @@
 				6003F5B5195388D20070C39A /* Tests */,
 				6003F58C195388D20070C39A /* Frameworks */,
 				6003F58B195388D20070C39A /* Products */,
+				202E1818D1C05E3739CAB204 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -110,6 +137,7 @@
 				6003F58F195388D20070C39A /* CoreGraphics.framework */,
 				6003F591195388D20070C39A /* UIKit.framework */,
 				6003F5AF195388D20070C39A /* XCTest.framework */,
+				F58BEF09F998562843169A45 /* Pods_GYPageViewController_Example.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -117,27 +145,16 @@
 		6003F593195388D20070C39A /* Example for GYPageViewController */ = {
 			isa = PBXGroup;
 			children = (
-				6003F59C195388D20070C39A /* ExampleAppDelegate.h */,
-				6003F59D195388D20070C39A /* ExampleAppDelegate.m */,
-				873B8AEA1B1F5CCA007FD442 /* Main.storyboard */,
-				6003F5A5195388D20070C39A /* ExampleViewController.h */,
-				6003F5A6195388D20070C39A /* ExampleViewController.m */,
+				73BCC96F1D1817A800F8DFCA /* LaunchScreen.storyboard */,
+				73BCC9701D1817A800F8DFCA /* Info.plist */,
+				73BCC95C1D180A5700F8DFCA /* Main.storyboard */,
+				73BCC9561D1809CB00F8DFCA /* ViewController.swift */,
+				73BCC9571D1809CB00F8DFCA /* TestChildViewController.swift */,
+				73BCC9581D1809CB00F8DFCA /* AppDelegate.swift */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
-				6003F594195388D20070C39A /* Supporting Files */,
 			);
 			name = "Example for GYPageViewController";
 			path = GYPageViewController;
-			sourceTree = "<group>";
-		};
-		6003F594195388D20070C39A /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				6003F595195388D20070C39A /* GYPageViewController-Info.plist */,
-				6003F596195388D20070C39A /* InfoPlist.strings */,
-				6003F599195388D20070C39A /* main.m */,
-				6003F59B195388D20070C39A /* GYPageViewController-Prefix.pch */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		6003F5B5195388D20070C39A /* Tests */ = {
@@ -162,11 +179,26 @@
 		60FF7A9C1954A5C5007DD14C /* Podspec Metadata */ = {
 			isa = PBXGroup;
 			children = (
+				73BCC96E1D18165600F8DFCA /* Classes */,
 				E67BEEE8A37DE3966F311912 /* GYPageViewController.podspec */,
 				3B42835A9951DB4C27FE47A9 /* README.md */,
 				B0EE2A99C99DC3F41B5C4F67 /* LICENSE */,
 			);
 			name = "Podspec Metadata";
+			sourceTree = "<group>";
+		};
+		73BCC96E1D18165600F8DFCA /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				73BCC9601D18164F00F8DFCA /* GYPageViewController.swift */,
+				73BCC9611D18164F00F8DFCA /* GYTabPageViewController.swift */,
+				73BCC9621D18164F00F8DFCA /* UIView+GYPauseAnimation.swift */,
+				73BCC9631D18164F00F8DFCA /* UIView+RemoveConstraints.swift */,
+				73BCC9641D18164F00F8DFCA /* NSLayoutConstraint+RemoveConstraints.swift */,
+				73BCC9651D18164F00F8DFCA /* NSArray+RemoveConstraints.swift */,
+				73BCC9661D18164F00F8DFCA /* UIViewController+ChildController.swift */,
+			);
+			name = Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -176,9 +208,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6003F5BF195388D20070C39A /* Build configuration list for PBXNativeTarget "GYPageViewController_Example" */;
 			buildPhases = (
+				2ED6AB875F61572338882A97 /* Check Pods Manifest.lock */,
 				6003F586195388D20070C39A /* Sources */,
 				6003F587195388D20070C39A /* Frameworks */,
 				6003F588195388D20070C39A /* Resources */,
+				6F7058DD32018146CE5D1779 /* Embed Pods Frameworks */,
+				5A53C1F1DEBC9B14FDA83B88 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -214,6 +249,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = Example;
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = GaoYu;
 				TargetAttributes = {
@@ -222,7 +258,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 6003F585195388D10070C39A /* Build configuration list for PBXProject "PROJECT" */;
+			buildConfigurationList = 6003F585195388D10070C39A /* Build configuration list for PBXProject "GYPageViewController" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -246,9 +282,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */,
+				73BCC9721D1817A800F8DFCA /* Info.plist in Resources */,
+				73BCC9711D1817A800F8DFCA /* LaunchScreen.storyboard in Resources */,
+				73BCC95D1D180A5700F8DFCA /* Main.storyboard in Resources */,
 				6003F5A9195388D20070C39A /* Images.xcassets in Resources */,
-				6003F598195388D20070C39A /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -262,14 +299,69 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		2ED6AB875F61572338882A97 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		5A53C1F1DEBC9B14FDA83B88 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-GYPageViewController_Example/Pods-GYPageViewController_Example-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6F7058DD32018146CE5D1779 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-GYPageViewController_Example/Pods-GYPageViewController_Example-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6003F586195388D20070C39A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6003F59E195388D20070C39A /* ExampleAppDelegate.m in Sources */,
-				6003F5A7195388D20070C39A /* ExampleViewController.m in Sources */,
-				6003F59A195388D20070C39A /* main.m in Sources */,
+				73BCC95B1D1809CB00F8DFCA /* AppDelegate.swift in Sources */,
+				73BCC9671D18164F00F8DFCA /* GYPageViewController.swift in Sources */,
+				73BCC96D1D18164F00F8DFCA /* UIViewController+ChildController.swift in Sources */,
+				73BCC95A1D1809CB00F8DFCA /* TestChildViewController.swift in Sources */,
+				73BCC96C1D18164F00F8DFCA /* NSArray+RemoveConstraints.swift in Sources */,
+				73BCC96A1D18164F00F8DFCA /* UIView+RemoveConstraints.swift in Sources */,
+				73BCC9691D18164F00F8DFCA /* UIView+GYPauseAnimation.swift in Sources */,
+				73BCC9681D18164F00F8DFCA /* GYTabPageViewController.swift in Sources */,
+				73BCC9591D1809CB00F8DFCA /* ViewController.swift in Sources */,
+				73BCC96B1D18164F00F8DFCA /* NSLayoutConstraint+RemoveConstraints.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,14 +384,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		6003F596195388D20070C39A /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				6003F597195388D20070C39A /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 		6003F5B8195388D20070C39A /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -386,30 +470,39 @@
 		};
 		6003F5C0195388D20070C39A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 63816B7BDB9D262BF89CFC29 /* Pods-GYPageViewController_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GYPageViewController/GYPageViewController-Prefix.pch";
-				INFOPLIST_FILE = "GYPageViewController/GYPageViewController-Info.plist";
+				INFOPLIST_FILE = GYPageViewController/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
 		6003F5C1195388D20070C39A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0A019E31992714A3D0BA2AF7 /* Pods-GYPageViewController_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GYPageViewController/GYPageViewController-Prefix.pch";
-				INFOPLIST_FILE = "GYPageViewController/GYPageViewController-Info.plist";
+				INFOPLIST_FILE = GYPageViewController/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -459,7 +552,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6003F585195388D10070C39A /* Build configuration list for PBXProject "PROJECT" */ = {
+		6003F585195388D10070C39A /* Build configuration list for PBXProject "GYPageViewController" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6003F5BD195388D20070C39A /* Debug */,
