@@ -19,6 +19,8 @@ GYTabPageViewController:
 ```
 ## ScreenShot
 
+![img](https://github.com/dev-gao/GYPageViewController/blob/master/Example/GYTabPageViewController-ScreenShot.png)
+
 ## Requirements
 
 iOS >= 7
