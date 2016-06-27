@@ -89,8 +89,11 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        self.view.layoutIfNeeded()
-        if self.firstWillLayoutSubViews {
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if self.firstDidLayoutSubViews {
             //Solve scrollView bug: can scroll to negative offset when pushing a UIViewController containing a UIScrollView using a UINavigationController.
             if let navigationController = self.navigationController {
                 if navigationController.viewControllers[navigationController.viewControllers.count - 1] == self{
@@ -98,18 +101,17 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
                     self.scrollView.contentInset = UIEdgeInsetsZero;
                 }
             }
-            self.updateScrollViewLayoutIfNeeded()
-            self.firstWillLayoutSubViews = false
-        } else {
-            self.updateScrollViewLayoutIfNeeded()
-        }
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        if self.firstDidLayoutSubViews {
-            self.updateScrollViewDisplayIndexIfNeeded()
+            
+            // Solve iOS7 crash: scrollView setContentOffset will trigger layout subviews methods. Use GCD dispatch_after to update scrollView contentOffset.
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.0 * Float(NSEC_PER_SEC))), dispatch_get_main_queue(), {
+                self.updateScrollViewLayoutIfNeeded()
+                self.updateScrollViewDisplayIndexIfNeeded()
+            })
             self.firstDidLayoutSubViews = false
+        } else {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.0 * Float(NSEC_PER_SEC))), dispatch_get_main_queue(), {
+                self.updateScrollViewLayoutIfNeeded()
+            })
         }
     }
     
@@ -117,7 +119,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         super.viewDidAppear(animated)
         if self.firstDidAppear {
             self.pageControllers[self.currentPageIndex].endAppearanceTransition()
-//            print("viewDidAppear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
+            //            print("viewDidAppear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
             //Config init page did appear
             self.gy_pageViewControllerDidShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, finished: true)
             self.delegate?.gy_pageViewController?(self, didLeaveViewController: self.pageControllers[self.lastSelectedIndex], toViewController: self.pageControllers[self.currentPageIndex], finished: true)
@@ -129,13 +131,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         self.pageControllers[self.currentPageIndex].beginAppearanceTransition(false, animated: true)
-//        print("viewWillDisappear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
+        //        print("viewWillDisappear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
     }
     
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
         self.pageControllers[self.currentPageIndex].endAppearanceTransition()
-//        print("viewDidDisappear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
+        //        print("viewDidDisappear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
     }
     
     //MARK: - Update controllers & views
@@ -485,23 +487,23 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
                 
                 self.addVisibleViewContorllerWith(self.guessToIndex)
                 self.pageControllers[self.guessToIndex].beginAppearanceTransition(true, animated: true)
-//                print("scrollViewDidScroll beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
+                //                print("scrollViewDidScroll beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
                 /**
                  *  Solve problem: When scroll with interaction, scroll page from one direction to the other for more than one time, the beginAppearanceTransition() method will invoke more than once but only one time endAppearanceTransition() invoked, so that the life cycle methods not correct.
                  *  When lastGuessIndex = self.currentPageIndex is the first time which need to invoke beginAppearanceTransition().
                  */
                 if lastGuessIndex == self.currentPageIndex {
                     self.pageControllers[self.currentPageIndex].beginAppearanceTransition(false, animated: true)
-//                    print("scrollViewDidScroll beginAppearanceTransition  self.currentPageIndex \(self.currentPageIndex)")
+                    //                    print("scrollViewDidScroll beginAppearanceTransition  self.currentPageIndex \(self.currentPageIndex)")
                 }
                 
                 if lastGuessIndex != self.currentPageIndex &&
                     lastGuessIndex >= 0 &&
                     lastGuessIndex < maxCount{
                     self.pageControllers[lastGuessIndex].beginAppearanceTransition(false, animated: true)
-//                    print("scrollViewDidScroll beginAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
+                    //                    print("scrollViewDidScroll beginAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
                     self.pageControllers[lastGuessIndex].endAppearanceTransition()
-//                    print("scrollViewDidScroll endAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
+                    //                    print("scrollViewDidScroll endAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
                 }
             }
         }
@@ -523,30 +525,28 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         if newIndex == oldIndex {//最终确定的位置与其实位置相同时，需要重新显示其实位置的视图，以及消失最近一次猜测的位置的视图。
             if self.guessToIndex >= 0 && self.guessToIndex < self.pageControllers.count {
                 self.pageControllers[oldIndex].beginAppearanceTransition(true, animated: true)
-//                print("EndDecelerating same beginAppearanceTransition  oldIndex  \(oldIndex)")
+                //                print("EndDecelerating same beginAppearanceTransition  oldIndex  \(oldIndex)")
                 self.pageControllers[oldIndex].endAppearanceTransition()
-//                print("EndDecelerating same endAppearanceTransition  oldIndex  \(oldIndex)")
+                //                print("EndDecelerating same endAppearanceTransition  oldIndex  \(oldIndex)")
                 self.pageControllers[self.guessToIndex].beginAppearanceTransition(false, animated: true)
-//                print("EndDecelerating same beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
+                //                print("EndDecelerating same beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
                 self.pageControllers[self.guessToIndex].endAppearanceTransition()
-//                print("EndDecelerating same endAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
+                //                print("EndDecelerating same endAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
             }
         } else {
             self.pageControllers[newIndex].endAppearanceTransition()
-//            print("EndDecelerating endAppearanceTransition  newIndex  \(newIndex)")
+            //            print("EndDecelerating endAppearanceTransition  newIndex  \(newIndex)")
             self.pageControllers[oldIndex].endAppearanceTransition()
-//            print("EndDecelerating endAppearanceTransition  oldIndex  \(oldIndex)")
-        }
-        
-        if self.guessToIndex >= 0 && self.guessToIndex < self.pageControllers.count {
-            self.gy_pageViewControllerDidShow(self.guessToIndex, toIndex: self.currentPageIndex, finished:true)
-            self.delegate?.gy_pageViewController?(self, didTransitonFrom: self.pageControllers[self.guessToIndex],
-                                                  toViewController: self.pageControllers[self.currentPageIndex])
+            //            print("EndDecelerating endAppearanceTransition  oldIndex  \(oldIndex)")
         }
         
         //归位，用于计算比较
         self.originOffset = Double(scrollView.contentOffset.x)
         self.guessToIndex = self.currentPageIndex
+        
+        self.gy_pageViewControllerDidShow(self.guessToIndex, toIndex: self.currentPageIndex, finished:true)
+        self.delegate?.gy_pageViewController?(self, didTransitonFrom: self.pageControllers[self.guessToIndex],
+                                              toViewController: self.pageControllers[self.currentPageIndex])
         //        print("====  DidEndDecelerating  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
     }
     

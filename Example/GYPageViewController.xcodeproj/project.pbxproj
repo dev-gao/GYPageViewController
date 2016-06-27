@@ -29,6 +29,7 @@
 		73BCC96D1D18164F00F8DFCA /* UIViewController+ChildController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73BCC9661D18164F00F8DFCA /* UIViewController+ChildController.swift */; };
 		73BCC9711D1817A800F8DFCA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73BCC96F1D1817A800F8DFCA /* LaunchScreen.storyboard */; };
 		73BCC9721D1817A800F8DFCA /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73BCC9701D1817A800F8DFCA /* Info.plist */; };
+		73C589A11D20C1E800395AA0 /* GYTabPageViewController-ScreenShot.png in Resources */ = {isa = PBXBuildFile; fileRef = 73C589A01D20C1E800395AA0 /* GYTabPageViewController-ScreenShot.png */; };
 		DABEFF1BD4D19F08ED9BFFA6 /* Pods_GYPageViewController_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F58BEF09F998562843169A45 /* Pods_GYPageViewController_Example.framework */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 		73BCC9661D18164F00F8DFCA /* UIViewController+ChildController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+ChildController.swift"; sourceTree = "<group>"; };
 		73BCC96F1D1817A800F8DFCA /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		73BCC9701D1817A800F8DFCA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		73C589A01D20C1E800395AA0 /* GYTabPageViewController-ScreenShot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "GYTabPageViewController-ScreenShot.png"; sourceTree = "<group>"; };
 		B0EE2A99C99DC3F41B5C4F67 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		E67BEEE8A37DE3966F311912 /* GYPageViewController.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = GYPageViewController.podspec; path = ../GYPageViewController.podspec; sourceTree = "<group>"; };
 		F58BEF09F998562843169A45 /* Pods_GYPageViewController_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GYPageViewController_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +114,7 @@
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
+				73C5899F1D20C1D700395AA0 /* ScreenShot */,
 				60FF7A9C1954A5C5007DD14C /* Podspec Metadata */,
 				6003F593195388D20070C39A /* Example for GYPageViewController */,
 				6003F5B5195388D20070C39A /* Tests */,
@@ -201,6 +204,14 @@
 			name = Classes;
 			sourceTree = "<group>";
 		};
+		73C5899F1D20C1D700395AA0 /* ScreenShot */ = {
+			isa = PBXGroup;
+			children = (
+				73C589A01D20C1E800395AA0 /* GYTabPageViewController-ScreenShot.png */,
+			);
+			name = ScreenShot;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -286,6 +297,7 @@
 				73BCC9711D1817A800F8DFCA /* LaunchScreen.storyboard in Resources */,
 				73BCC95D1D180A5700F8DFCA /* Main.storyboard in Resources */,
 				6003F5A9195388D20070C39A /* Images.xcassets in Resources */,
+				73C589A11D20C1E800395AA0 /* GYTabPageViewController-ScreenShot.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,6 +490,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GYPageViewController/GYPageViewController-Prefix.pch";
 				INFOPLIST_FILE = GYPageViewController/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
@@ -498,6 +511,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GYPageViewController/GYPageViewController-Prefix.pch";
 				INFOPLIST_FILE = GYPageViewController/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
