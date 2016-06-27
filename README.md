@@ -5,6 +5,10 @@ A page view controller instead of UIPageViewController. It manages the child con
 - GYPageViewController can manages the child controllers and support navigation with invoking method and user interaction.
 - GYTabPageViewController adds a segmented control bar to the page view for the user to change index.
 
+## ScreenShot
+
+![img](https://github.com/dev-gao/GYPageViewController/blob/master/Example/GYTabPageViewController-ScreenShot.png)
+
 ## Example
 ```objc
 GYPageViewController:
@@ -17,9 +21,6 @@ GYTabPageViewController:
             vc.showPageAtIndex(2, animated: false)
             self.navigationController?.pushViewController(vc, animated: true)
 ```
-## ScreenShot
-
-![img](https://github.com/dev-gao/GYPageViewController/blob/master/Example/GYTabPageViewController-ScreenShot.png)
 
 ## Requirements
 
