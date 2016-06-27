@@ -1,33 +1,30 @@
 # GYPageViewController
-<<<<<<< HEAD
+A page view controller instead of UIPageViewController. It manages the child controllers' life cycles as same as UIPageViewController.<br>
+[Solve UIPageViewController bug which child controller is navigated to a wrong index](http://stackoverflow.com/questions/14220289/removing-a-view-controller-from-uipageviewcontroller/16308151)<br>
 
-[![CI Status](http://img.shields.io/travis/GaoYu/GYPageViewController.svg?style=flat)](https://travis-ci.org/GaoYu/GYPageViewController)
-[![Version](https://img.shields.io/cocoapods/v/GYPageViewController.svg?style=flat)](http://cocoapods.org/pods/GYPageViewController)
-[![License](https://img.shields.io/cocoapods/l/GYPageViewController.svg?style=flat)](http://cocoapods.org/pods/GYPageViewController)
-[![Platform](https://img.shields.io/cocoapods/p/GYPageViewController.svg?style=flat)](http://cocoapods.org/pods/GYPageViewController)
+- GYPageViewController can manages the child controllers and support navigation with invoking method and user interaction.
+- GYTabPageViewController adds a segmented control bar to the page view for the user to change index.
 
 ## Example
+```objc
+GYPageViewController:
+            let vc = GYPageViewController(pageControllers: pageControllers)
+            vc.showPageAtIndex(2, animated: false)
+            self.navigationController?.pushViewController(vc, animated: true)
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+GYTabPageViewController:
+            let vc = GYTabPageViewController(pageTitles: titlesArray, pageControllers: pageControllers)
+            vc.showPageAtIndex(2, animated: false)
+            self.navigationController?.pushViewController(vc, animated: true)
+```
+## ScreenShot
 
 ## Requirements
 
+iOS >= 7
+
 ## Installation
+Copy codes now, will add to git specs soon.
 
-GYPageViewController is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
-
-```ruby
-pod "GYPageViewController"
-```
-
-## Author
-
-GaoYu, fightrain@126.com
-
-## License
-
-GYPageViewController is available under the MIT license. See the LICENSE file for more info.
-=======
-Implementation a page view controller with scroll view. To solve 2 Problems of UIPageViewController and take the place of UIPageViewController. 
->>>>>>> b53f7ea3e629b9da18ebf54e32cc54aa8dc9c5e4
+## Contact
+Email:fightrain@126.com GaoYu
