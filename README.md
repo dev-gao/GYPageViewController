@@ -6,6 +6,7 @@ A page view controller instead of UIPageViewController. It manages the child con
 - GYTabPageViewController adds a segmented control bar to the page view for the user to change index.
 
 ## Example
+```objc
 GYPageViewController:
             let vc = GYPageViewController(pageControllers: pageControllers)
             vc.showPageAtIndex(2, animated: false)
@@ -15,7 +16,7 @@ GYTabPageViewController:
             let vc = GYTabPageViewController(pageTitles: titlesArray, pageControllers: pageControllers)
             vc.showPageAtIndex(2, animated: false)
             self.navigationController?.pushViewController(vc, animated: true)
-
+```
 ## ScreenShot
 
 ## Requirements
