@@ -13,6 +13,16 @@ enum GYPageScrollDirection {
     case Right
 }
 
+@objc protocol GYPageViewControllerDataSource {
+    func gy_pageViewController(_:GYPageViewController,
+                               controllerAtIndex index:Int) -> UIViewController!
+    
+    func numberOfControllers(_:GYPageViewController) -> Int
+    
+    optional func gy_pageViewController(_:GYPageViewController,
+                                        titleAtIndex index:Int) -> String!
+}
+
 @objc protocol GYPageViewControllerDelegate {
     
     // Sent when a gesture-initiated transition begins.
@@ -24,6 +34,7 @@ enum GYPageScrollDirection {
     optional func gy_pageViewController(pageViewController: GYPageViewController,
                                         didTransitonFrom fromVC:UIViewController,
                                                          toViewController toVC:UIViewController)
+    
     
     // Sent when method(func showPageAtIndex(index:Int,animated:Bool)) begin to be called.
     optional func gy_pageViewController(pageViewController: GYPageViewController,
@@ -38,13 +49,35 @@ enum GYPageScrollDirection {
                                                                                 finished:Bool)
 }
 
-class GYPageViewController: UIViewController, UIScrollViewDelegate {
+class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDelegate {
+    weak var delegate:GYPageViewControllerDelegate?
+    weak var dataSource:GYPageViewControllerDataSource?
+    
     private(set) var scrollView:UIScrollView! = UIScrollView()
-    private(set) var pageControllers:Array<UIViewController>!
+    var pageCount:Int {
+        get {
+            return self.dataSource!.numberOfControllers(self)
+        }
+    }
     private(set) var currentPageIndex = 0
     private(set) var isDragging = false
     var contentEdgeInsets = UIEdgeInsetsZero
-    weak var delegate:GYPageViewControllerDelegate?
+    private lazy var memCache:NSCache = {
+        let cache = NSCache()
+        cache.countLimit = 3
+        return cache
+    }()
+    
+    private var cacheLimit:Int {
+        get {
+            return self.memCache.countLimit
+        }
+        set {
+            self.memCache.countLimit = newValue;
+        }
+    }
+    
+    private var childsToClean = Set<UIViewController>()
     
     private var originOffset = 0.0                  //用于手势拖动scrollView时，判断方向
     private var guessToIndex = -1                   //用于手势拖动scrollView时，判断要去的页面
@@ -53,24 +86,14 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     private var firstDidAppear = true               //用于界定页面首次DidAppear。
     private var firstDidLayoutSubViews = true       //用于界定页面首次DidLayoutsubviews。
     private var firstWillLayoutSubViews = true      //用于界定页面首次WillLayoutsubviews。
-    
-    
-    //MARK: - Init
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    init(pageControllers:Array<UIViewController>) {
-        super.init(nibName: nil, bundle: nil)
-        self.pageControllers = pageControllers
-        assert(self.pageControllers != nil)
-    }
+    private var isDecelerating = false              //正在减速操作
     
     //MARK: - Lift Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.view.backgroundColor = UIColor.whiteColor()
+        self.memCache.delegate = self
         
         self.configScrollView(self.scrollView)
     }
@@ -80,11 +103,11 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         if self.firstWillAppear {
             //Config init page
             self.gy_pageViewControllerWillShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, animated: false)
-            self.delegate?.gy_pageViewController?(self, willLeaveViewController: self.pageControllers[self.lastSelectedIndex], toViewController: self.pageControllers[self.currentPageIndex], animated: false)
-            self.pageControllers[self.currentPageIndex].beginAppearanceTransition(true, animated: true)
+            self.delegate?.gy_pageViewController?(self, willLeaveViewController: self.controllerAtIndex(self.lastSelectedIndex), toViewController: self.controllerAtIndex(self.currentPageIndex), animated: false)
 //            print("viewWillAppear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
             self.firstWillAppear = false
         }
+        self.controllerAtIndex(self.currentPageIndex).beginAppearanceTransition(true, animated: true)
     }
     
     override func viewWillLayoutSubviews() {
@@ -118,26 +141,32 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         if self.firstDidAppear {
-            self.pageControllers[self.currentPageIndex].endAppearanceTransition()
             //            print("viewDidAppear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
             //Config init page did appear
             self.gy_pageViewControllerDidShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, finished: true)
-            self.delegate?.gy_pageViewController?(self, didLeaveViewController: self.pageControllers[self.lastSelectedIndex], toViewController: self.pageControllers[self.currentPageIndex], finished: true)
+            self.delegate?.gy_pageViewController?(self, didLeaveViewController: self.controllerAtIndex(self.lastSelectedIndex), toViewController: self.controllerAtIndex(self.currentPageIndex), finished: true)
             
             self.firstDidAppear = false
         }
+        self.controllerAtIndex(self.currentPageIndex).endAppearanceTransition()
     }
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
-        self.pageControllers[self.currentPageIndex].beginAppearanceTransition(false, animated: true)
+        self.controllerAtIndex(self.currentPageIndex).beginAppearanceTransition(false, animated: true)
         //        print("viewWillDisappear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
     }
     
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
-        self.pageControllers[self.currentPageIndex].endAppearanceTransition()
+        self.controllerAtIndex(self.currentPageIndex).endAppearanceTransition()
         //        print("viewDidDisappear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        
+        self.memCache.removeAllObjects()
     }
     
     //MARK: - Update controllers & views
@@ -154,19 +183,8 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
      - parameter animated: animation bool. true to animate, false not animate
      */
     @objc func showPageAtIndex(index:Int,animated:Bool) {
-        if index < 0 || index >= self.pageControllers.count {
+        if index < 0 || index >= self.pageCount {
             return
-        }
-        
-        // Prepare to scroll if scrollView is initialized and displayed correctly
-        if self.scrollView.frame.size.width > 0.0 &&
-            self.scrollView.contentSize.width > 0.0{
-            
-            self.gy_pageViewControllerWillShow(self.currentPageIndex, toIndex: index, animated: animated)
-            self.delegate?.gy_pageViewController?(self, willLeaveViewController: self.pageControllers[self.currentPageIndex],
-                                                  toViewController: self.pageControllers[index], animated: animated)
-            
-            self.addVisibleViewContorllerWith(index)
         }
         
         // Synchronize the indexs and store old select index
@@ -174,15 +192,26 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         self.lastSelectedIndex = self.currentPageIndex
         self.currentPageIndex = index
         
+        // Prepare to scroll if scrollView is initialized and displayed correctly
+        if self.scrollView.frame.size.width > 0.0 &&
+            self.scrollView.contentSize.width > 0.0{
+            
+            self.gy_pageViewControllerWillShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, animated: animated)
+            self.delegate?.gy_pageViewController?(self, willLeaveViewController: self.controllerAtIndex(self.lastSelectedIndex),
+                                                  toViewController: self.controllerAtIndex(self.currentPageIndex), animated: animated)
+            
+            self.addVisibleViewContorllerWith(index)
+        }
+        
         // Scroll to current index if scrollView is initialized and displayed correctly
         if self.scrollView.frame.size.width > 0.0 &&
             self.scrollView.contentSize.width > 0.0{
             
             // Aciton closure before simulated scroll animation
             let scrollBeginAnimation = { () -> Void in
-                self.pageControllers[self.currentPageIndex].beginAppearanceTransition(true, animated: animated)
+                self.controllerAtIndex(self.currentPageIndex).beginAppearanceTransition(true, animated: animated)
                 if self.currentPageIndex != self.lastSelectedIndex {
-                    self.pageControllers[self.lastSelectedIndex].beginAppearanceTransition(false, animated: animated)
+                    self.controllerAtIndex(self.lastSelectedIndex).beginAppearanceTransition(false, animated: animated)
                 }
             }
             
@@ -200,15 +229,16 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
             
             // Action closure after simulated scroll animation
             let scrollEndAnimation = { () -> Void in
-                self.pageControllers[self.currentPageIndex].endAppearanceTransition()
+                self.controllerAtIndex(self.currentPageIndex).endAppearanceTransition()
                 if self.currentPageIndex != self.lastSelectedIndex {
-                    self.pageControllers[self.lastSelectedIndex].endAppearanceTransition()
+                    self.controllerAtIndex(self.lastSelectedIndex).endAppearanceTransition()
                 }
                 
                 self.gy_pageViewControllerDidShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, finished: animated)
-                self.delegate?.gy_pageViewController?(self, didLeaveViewController: self.pageControllers[self.lastSelectedIndex],
-                                                      toViewController: self.pageControllers[self.currentPageIndex],
+                self.delegate?.gy_pageViewController?(self, didLeaveViewController: self.controllerAtIndex(self.lastSelectedIndex),
+                                                      toViewController: self.controllerAtIndex(self.currentPageIndex),
                                                       finished:animated)
+                self.cleanCacheToClean()
             }
             
             scrollBeginAnimation()
@@ -218,9 +248,9 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
                     // Define variables
                     let pageSize = self.scrollView.frame.size
                     let direction = (self.lastSelectedIndex < self.currentPageIndex) ? GYPageScrollDirection.Right : GYPageScrollDirection.Left
-                    let lastView = self.pageControllers[self.lastSelectedIndex].view
-                    let currentView = self.pageControllers[self.currentPageIndex].view
-                    let oldSelectView = self.pageControllers[oldSelectedIndex].view
+                    let lastView = self.controllerAtIndex(self.lastSelectedIndex).view
+                    let currentView = self.controllerAtIndex(self.currentPageIndex).view
+                    let oldSelectView = self.controllerAtIndex(oldSelectedIndex).view
                     let duration = 0.3
                     let backgroundIndex = self.calcIndexWithOffset(Float(self.scrollView.contentOffset.x),
                                                                    width: Float(self.scrollView.frame.size.width))
@@ -234,7 +264,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
                     if oldSelectView.layer.animationKeys()?.count > 0 &&
                         lastView.layer.animationKeys()?.count > 0
                     {
-                        let tmpView = self.pageControllers[backgroundIndex].view
+                        let tmpView = self.controllerAtIndex(backgroundIndex).view
                         if tmpView != currentView &&
                             tmpView != lastView
                         {
@@ -323,7 +353,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     
     @objc private func moveBackToOriginPositionIfNeeded(view:UIView?,index:Int)
     {
-        if index < 0 || index >= self.pageControllers.count {
+        if index < 0 || index >= self.pageCount {
             return
         }
         
@@ -347,13 +377,23 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     }
     
     @objc private func addVisibleViewContorllerWith(index:Int) {
-        if index < 0 || index > self.pageControllers.count {
+        if index < 0 || index > self.pageCount {
             return
         }
+        
+        var vc:UIViewController? = self.memCache.objectForKey(index) as? UIViewController
+        if vc == nil {
+            vc = self.controllerAtIndex(index)
+        }
+        
         let childViewFrame = self.calcVisibleViewControllerFrameWith(index)
-        self.gy_addChildViewController(self.pageControllers[index],
+        self.gy_addChildViewController(vc!,
                                        inView: self.scrollView,
                                        withFrame: childViewFrame)
+//        print("------------------------t1- add \(index)")
+        self.memCache.setObject(self.controllerAtIndex(index), forKey: index)
+        
+//        print("------------------------t2- add \(index)")
     }
     
     @objc private func updateScrollViewDisplayIndexIfNeeded() {
@@ -369,14 +409,14 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
             {
                 self.scrollView.contentOffset = newOffset
             }
-            self.pageControllers[self.currentPageIndex].view.frame = self.calcVisibleViewControllerFrameWith(self.currentPageIndex)
+            self.controllerAtIndex(self.currentPageIndex).view.frame = self.calcVisibleViewControllerFrameWith(self.currentPageIndex)
         }
     }
     
     // Do not use it in viewDidLayoutSubviews on ios 7 device.
     @objc private func updateScrollViewLayoutIfNeeded() {
         if self.scrollView.frame.size.width > 0.0 {
-            let width = CGFloat(self.pageControllers.count) * self.scrollView.frame.size.width
+            let width = CGFloat(self.pageCount) * self.scrollView.frame.size.width
             let height = self.scrollView.frame.size.height
             let oldContentSize = self.scrollView.contentSize
             if width != oldContentSize.width ||
@@ -412,6 +452,33 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         }
         
         return startIndex
+    }
+    
+    @objc private func controllerAtIndex(index:NSInteger) -> UIViewController
+    {
+        return self.dataSource!.gy_pageViewController(self, controllerAtIndex:index);
+    }
+    
+    @objc private func cleanCacheToClean() {
+        let currentPage = self.controllerAtIndex(self.currentPageIndex)
+        if self.childsToClean.contains(currentPage) {
+            if let removeIndex = self.childsToClean.indexOf(currentPage) {
+                self.childsToClean.removeAtIndex(removeIndex)
+                self.memCache.setObject(currentPage, forKey: self.currentPageIndex)
+            }
+        }
+        
+        for vc in self.childsToClean {
+//            print("-21-  clean cache index \((vc as! TestChildViewController).pageIndex)")
+            vc.gy_removeFromParentViewController()
+        }
+        self.childsToClean.removeAll()
+        
+//        print("-31- remain111 ==============================>")
+//        for vcc in self.childViewControllers {
+//            print("remain \((vcc as! TestChildViewController).pageIndex)")
+//        }
+//        print("-31- remain111 ==============================>")
     }
     
     //MARK: - Subviews Configuration
@@ -462,9 +529,77 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         self.view.addConstraints(constraints)
     }
     
+    //MARK: - NSCacheDelegate
+    func cache(cache: NSCache, willEvictObject obj: AnyObject) {
+        if obj.isKindOfClass(UIViewController.self) {
+            let vc = obj as! UIViewController
+//            print("-1- to remove from cache \((vc as! TestChildViewController).pageIndex)")
+            if self.childViewControllers.contains(vc) {
+//                print("============================tracking \(scrollView.tracking)  dragging \(scrollView.dragging) decelerating \(scrollView.decelerating)")
+                
+                let AddCacheToCleanIfNeed = { (midIndex:Int) -> Void in
+                    //Modify memCache through showPageAtIndex.
+                    var leftIndex = midIndex - 1;
+                    var rightIndex = midIndex + 1;
+                    if leftIndex < 0 {
+                        leftIndex = midIndex
+                    }
+                    if rightIndex > self.pageCount - 1 {
+                        rightIndex = midIndex
+                    }
+                    
+                    let leftNeighbour = self.dataSource!.gy_pageViewController(self, controllerAtIndex: leftIndex)
+                    let midPage = self.dataSource!.gy_pageViewController(self, controllerAtIndex: midIndex)
+                    let rightNeighbour = self.dataSource!.gy_pageViewController(self, controllerAtIndex: rightIndex)
+                    
+                    if leftNeighbour == vc || rightNeighbour == vc || midPage == vc
+                    {
+                        self.childsToClean.insert(vc)
+                    }
+                }
+                
+                // When scrollView's dragging, tracking and decelerating are all false.At least it means the cache eviction is not triggered by continuous interaction page changing.
+                if self.scrollView.dragging == false &&
+                   self.scrollView.tracking == false &&
+                   self.scrollView.decelerating == false
+                {
+                    let lastPage = self.controllerAtIndex(self.lastSelectedIndex)
+                    let currentPage = self.controllerAtIndex(self.currentPageIndex)
+                    if lastPage == vc || currentPage == vc {
+                        self.childsToClean.insert(vc)
+                    }
+//                    print("self.currentPageIndex  \(self.currentPageIndex)")
+                } else if self.scrollView.dragging == true
+                {
+                    AddCacheToCleanIfNeed(self.guessToIndex)
+//                    print("self.guessToIndex  \(self.guessToIndex)")
+                }
+                
+                if self.childsToClean.count > 0 {
+                    return
+                }
+                
+//                print("-2- remove index : \((vc as! TestChildViewController).pageIndex)")
+                vc.gy_removeFromParentViewController()
+//                print("-3- remain ==============================>")
+//                for vcc in self.childViewControllers {
+//                    print("remain \((vcc as! TestChildViewController).pageIndex)")
+//                }
+//                print("-3- remain ==============================>")
+            }
+        }
+    }
+    
     //MARK: - UIScrollViewDelegate
     // any offset changes
     func scrollViewDidScroll(scrollView: UIScrollView) {
+//        print("tracking \(scrollView.tracking)  dragging \(scrollView.dragging) decelerating \(scrollView.decelerating)")
+        if scrollView.tracking == true &&
+           scrollView.decelerating == true
+        {
+//            print("     guessToIndex  \(guessToIndex)   self.currentPageIndex  \(self.currentPageIndex)")
+        }
+        
         if scrollView.dragging == true && scrollView == self.scrollView {
             let offset = scrollView.contentOffset.x
             let width = CGRectGetWidth(scrollView.frame)
@@ -474,36 +609,43 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
             } else if (self.originOffset > Double(offset)) {
                 self.guessToIndex = Int(floor((offset)/width))
             } else {}
-            let maxCount = self.pageControllers.count
+            let maxCount = self.pageCount
+    
             
-            if lastGuessIndex != guessToIndex &&
-                guessToIndex != self.currentPageIndex &&
-                self.guessToIndex >= 0 &&
-                self.guessToIndex < maxCount
+            // 1.Decelerating is false when first drag during discontinuous interaction.
+            // 2.Decelerating is true when drag during continuous interaction.
+            if (guessToIndex != self.currentPageIndex &&
+                self.scrollView.decelerating == false) ||
+                self.scrollView.decelerating == true
             {
-                self.gy_pageViewControllerWillShow(self.guessToIndex, toIndex: self.currentPageIndex, animated: true)
-                self.delegate?.gy_pageViewController?(self, willTransitonFrom: self.pageControllers[self.guessToIndex],
-                                                      toViewController: self.pageControllers[self.currentPageIndex])
-                
-                self.addVisibleViewContorllerWith(self.guessToIndex)
-                self.pageControllers[self.guessToIndex].beginAppearanceTransition(true, animated: true)
-                //                print("scrollViewDidScroll beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
-                /**
-                 *  Solve problem: When scroll with interaction, scroll page from one direction to the other for more than one time, the beginAppearanceTransition() method will invoke more than once but only one time endAppearanceTransition() invoked, so that the life cycle methods not correct.
-                 *  When lastGuessIndex = self.currentPageIndex is the first time which need to invoke beginAppearanceTransition().
-                 */
-                if lastGuessIndex == self.currentPageIndex {
-                    self.pageControllers[self.currentPageIndex].beginAppearanceTransition(false, animated: true)
-                    //                    print("scrollViewDidScroll beginAppearanceTransition  self.currentPageIndex \(self.currentPageIndex)")
-                }
-                
-                if lastGuessIndex != self.currentPageIndex &&
-                    lastGuessIndex >= 0 &&
-                    lastGuessIndex < maxCount{
-                    self.pageControllers[lastGuessIndex].beginAppearanceTransition(false, animated: true)
-                    //                    print("scrollViewDidScroll beginAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
-                    self.pageControllers[lastGuessIndex].endAppearanceTransition()
-                    //                    print("scrollViewDidScroll endAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
+                if lastGuessIndex != self.guessToIndex &&
+                    self.guessToIndex >= 0 &&
+                    self.guessToIndex < maxCount
+                {
+                    self.gy_pageViewControllerWillShow(self.guessToIndex, toIndex: self.currentPageIndex, animated: true)
+                    self.delegate?.gy_pageViewController?(self, willTransitonFrom: self.controllerAtIndex(self.guessToIndex),
+                                                          toViewController: self.controllerAtIndex(self.currentPageIndex))
+                    
+                    self.addVisibleViewContorllerWith(self.guessToIndex)
+                    self.controllerAtIndex(self.guessToIndex).beginAppearanceTransition(true, animated: true)
+                    //                print("scrollViewDidScroll beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
+                    /**
+                     *  Solve problem: When scroll with interaction, scroll page from one direction to the other for more than one time, the beginAppearanceTransition() method will invoke more than once but only one time endAppearanceTransition() invoked, so that the life cycle methods not correct.
+                     *  When lastGuessIndex = self.currentPageIndex is the first time which need to invoke beginAppearanceTransition().
+                     */
+                    if lastGuessIndex == self.currentPageIndex {
+                        self.controllerAtIndex(self.currentPageIndex).beginAppearanceTransition(false, animated: true)
+                        //                    print("scrollViewDidScroll beginAppearanceTransition  self.currentPageIndex \(self.currentPageIndex)")
+                    }
+                    
+                    if lastGuessIndex != self.currentPageIndex &&
+                        lastGuessIndex >= 0 &&
+                        lastGuessIndex < maxCount{
+                        self.controllerAtIndex(lastGuessIndex).beginAppearanceTransition(false, animated: true)
+                        //                    print("scrollViewDidScroll beginAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
+                        self.controllerAtIndex(lastGuessIndex).endAppearanceTransition()
+                        //                    print("scrollViewDidScroll endAppearanceTransition  lastGuessIndex \(lastGuessIndex)")
+                    }
                 }
             }
         }
@@ -513,6 +655,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     // called on finger up as we are moving
     func scrollViewWillBeginDecelerating(scrollView: UIScrollView) {
         //        print("====  BeginDecelerating dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+        self.isDecelerating = true
     }
     
     // called when scroll view grinds to a halt
@@ -522,21 +665,21 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         let oldIndex = self.currentPageIndex
         self.currentPageIndex = newIndex
         
-        if newIndex == oldIndex {//最终确定的位置与其实位置相同时，需要重新显示其实位置的视图，以及消失最近一次猜测的位置的视图。
-            if self.guessToIndex >= 0 && self.guessToIndex < self.pageControllers.count {
-                self.pageControllers[oldIndex].beginAppearanceTransition(true, animated: true)
+        if newIndex == oldIndex {//最终确定的位置与开始位置相同时，需要重新显示开始位置的视图，以及消失最近一次猜测的位置的视图。
+            if self.guessToIndex >= 0 && self.guessToIndex < self.pageCount {
+                self.controllerAtIndex(oldIndex).beginAppearanceTransition(true, animated: true)
                 //                print("EndDecelerating same beginAppearanceTransition  oldIndex  \(oldIndex)")
-                self.pageControllers[oldIndex].endAppearanceTransition()
+                self.controllerAtIndex(oldIndex).endAppearanceTransition()
                 //                print("EndDecelerating same endAppearanceTransition  oldIndex  \(oldIndex)")
-                self.pageControllers[self.guessToIndex].beginAppearanceTransition(false, animated: true)
+                self.controllerAtIndex(self.guessToIndex).beginAppearanceTransition(false, animated: true)
                 //                print("EndDecelerating same beginAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
-                self.pageControllers[self.guessToIndex].endAppearanceTransition()
+                self.controllerAtIndex(self.guessToIndex).endAppearanceTransition()
                 //                print("EndDecelerating same endAppearanceTransition  self.guessToIndex  \(self.guessToIndex)")
             }
         } else {
-            self.pageControllers[newIndex].endAppearanceTransition()
+            self.controllerAtIndex(newIndex).endAppearanceTransition()
             //            print("EndDecelerating endAppearanceTransition  newIndex  \(newIndex)")
-            self.pageControllers[oldIndex].endAppearanceTransition()
+            self.controllerAtIndex(oldIndex).endAppearanceTransition()
             //            print("EndDecelerating endAppearanceTransition  oldIndex  \(oldIndex)")
         }
         
@@ -545,21 +688,37 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
         self.guessToIndex = self.currentPageIndex
         
         self.gy_pageViewControllerDidShow(self.guessToIndex, toIndex: self.currentPageIndex, finished:true)
-        self.delegate?.gy_pageViewController?(self, didTransitonFrom: self.pageControllers[self.guessToIndex],
-                                              toViewController: self.pageControllers[self.currentPageIndex])
+        self.delegate?.gy_pageViewController?(self, didTransitonFrom: self.controllerAtIndex(self.guessToIndex),
+                                              toViewController: self.controllerAtIndex(self.currentPageIndex))
         //        print("====  DidEndDecelerating  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+        self.isDecelerating = false
+        
+        self.cleanCacheToClean()
     }
     
     // called on start of dragging (may require some time and or distance to move)
     func scrollViewWillBeginDragging(scrollView: UIScrollView) {
-        self.originOffset = Double(scrollView.contentOffset.x)
-        self.guessToIndex = self.currentPageIndex
+        if scrollView.decelerating == false {
+            self.originOffset = Double(scrollView.contentOffset.x)
+            self.guessToIndex = self.currentPageIndex
+        }
         //        print("====  WillBeginDragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
     }
     
     // called on finger up if the user dragged. velocity is in points/millisecond. targetContentOffset may be changed to adjust where the scroll view comes to rest
     func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        //        print("====  WillEndDragging: \(velocity)  targetContentOffset: \(targetContentOffset.memory)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+//                print("====  WillEndDragging: \(velocity)  targetContentOffset: \(targetContentOffset.memory)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)  velocity  \(velocity)")
+        
+        if scrollView.decelerating == true {
+            // Update originOffset for calculating new guessIndex to add controller.
+            let offset = scrollView.contentOffset.x
+            let width = CGRectGetWidth(scrollView.frame)
+            if velocity.x > 0 { // to right page
+                self.originOffset = Double(floor(offset/width)) * Double(width)
+            } else if velocity.x < 0 {// to left page
+                self.originOffset = Double(ceil(offset/width)) * Double(width)
+            }
+        }
     }
     
     // called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
@@ -569,19 +728,6 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate {
     
     // called when setContentOffset/scrollRectVisible:animated: finishes. not called if not animating
     func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
-        /* Use when set scroll view contentOffset with animated true. But now scroll animation is customized by invoking setContentOffset() animation false.
-         
-         self.pageControllers[self.currentPageIndex].endAppearanceTransition()
-         if self.currentPageIndex != self.lastSelectedIndex {
-         self.pageControllers[self.lastSelectedIndex].endAppearanceTransition()
-         }
-         
-         self.gy_pageViewControllerDidShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, finished: true)
-         self.delegate?.gy_pageViewController?(self, didLeaveViewController: self.pageControllers[self.lastSelectedIndex],
-         toViewController: self.pageControllers[self.currentPageIndex],
-         finished:true)
-         */
-        
         //        print("====  DidEndScrollingAnimation: dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
     }
     

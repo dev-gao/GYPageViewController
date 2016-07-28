@@ -8,12 +8,14 @@
 
 import UIKit
 
-class ViewController: UITableViewController {
+class ViewController: UITableViewController ,GYPageViewControllerDataSource, GYPageViewControllerDelegate {
+    
+    @objc var pageControllers:Array<UIViewController>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = "GYPageViewController"
+        self.title = "Demo"
         
         self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "CustomCell")
     }
@@ -60,7 +62,10 @@ class ViewController: UITableViewController {
                 
                 pageControllers.append(tabVc)
             }
-            let vc = GYTabPageViewController(pageTitles: titlesArray, pageControllers: pageControllers)
+            self.pageControllers = pageControllers
+            let vc = GYTabPageViewController(pageTitles: titlesArray)
+            vc.delegate = self
+            vc.dataSource = self
             vc.showPageAtIndex(2, animated: false)
             self.navigationController?.pushViewController(vc, animated: true)
         } else if indexPath.row == 1 {
@@ -83,10 +88,21 @@ class ViewController: UITableViewController {
                 
                 pageControllers.append(tabVc)
             }
+            self.pageControllers = pageControllers
             let vc = TestPageViewController(pageTitles: titlesArray, pageControllers: pageControllers)
             vc.showPageAtIndex(2, animated: false)
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    //MARK: - GYPageViewControllerDataSource & GYPageViewControllerDelegate
+    @objc func gy_pageViewController(_: GYPageViewController, controllerAtIndex index: Int) -> UIViewController! {
+        return self.pageControllers[index]
+    }
+    
+    @objc func numberOfControllers(_: GYPageViewController) -> Int {
+        return self.pageControllers.count
+    }
+    
 }
 

@@ -23,10 +23,8 @@ class GYTabPageViewController: GYPageViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(pageTitles:Array<String>,pageControllers:Array<UIViewController>) {
-        super.init(pageControllers: pageControllers)
-        
-        assert((pageTitles.count == pageControllers.count), "title count is not equal controllers count")
+    init(pageTitles:Array<String>) {
+        super.init(nibName: nil, bundle: nil)
         
         self.pageTitles = pageTitles
         if self.pageTitles.count > 1 {
@@ -38,6 +36,7 @@ class GYTabPageViewController: GYPageViewController {
     //MARK: - Lift Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        assert((pageTitles.count == self.pageCount), "title count is not equal controllers count")
         
         if self.pageTitles.count > 1 {
             self.layoutSegmentedControl(self.segmentedControl)
