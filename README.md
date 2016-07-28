@@ -1,4 +1,9 @@
 # GYPageViewController
+中文博客:
+[UIPageViewController缺陷](http://www.jianshu.com/p/3cca93ceee96)
+[UIPageViewContorller替换方案](http://www.jianshu.com/p/52a393691e77)
+
+
 A page view controller instead of UIPageViewController. It manages the child controllers' life cycles as same as UIPageViewController.<br>
 [Solve UIPageViewController bug which child controller is navigated to a wrong index](http://stackoverflow.com/questions/14220289/removing-a-view-controller-from-uipageviewcontroller/16308151)<br>
 

@@ -60,7 +60,6 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         }
     }
     private(set) var currentPageIndex = 0
-    private(set) var isDragging = false
     var contentEdgeInsets = UIEdgeInsetsZero
     private lazy var memCache:NSCache = {
         let cache = NSCache()
