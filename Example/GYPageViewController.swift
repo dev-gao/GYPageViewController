@@ -18,9 +18,6 @@ enum GYPageScrollDirection {
                                controllerAtIndex index:Int) -> UIViewController!
     
     func numberOfControllers(_:GYPageViewController) -> Int
-    
-    optional func gy_pageViewController(_:GYPageViewController,
-                                        titleAtIndex index:Int) -> String!
 }
 
 @objc protocol GYPageViewControllerDelegate {
@@ -67,7 +64,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         return cache
     }()
     
-    private var cacheLimit:Int {
+    var cacheLimit:Int {
         get {
             return self.memCache.countLimit
         }
