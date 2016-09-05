@@ -22,22 +22,22 @@ class TestChildViewController: UIViewController {
     @objc override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
-//        print("Will Appear :    \(pageIndex)")
+        print("Will Appear :    \(pageIndex)")
     }
     
     @objc override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-//        print("Did Appear :    \(pageIndex)")
+        print("Did Appear :    \(pageIndex)")
     }
     
     @objc override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
-//        print("Will Disappear :    \(pageIndex)")
+        print("Will Disappear :    \(pageIndex)")
     }
     
     @objc override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
-//        print("Did Disappear :    \(pageIndex)")
+        print("Did Disappear :    \(pageIndex)")
     }
 
 }

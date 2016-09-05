@@ -35,13 +35,15 @@ extension UIViewController {
 
     func gy_addChildViewController(viewController:UIViewController,
                                    setSubViewAction:((superViewController:UIViewController,childViewController:UIViewController) -> Void)?) {
-        if self.childViewControllers.contains(viewController) == false {
+        let containsVC = self.childViewControllers.contains(viewController)
+        
+        if containsVC == false {
             self.addChildViewController(viewController)
         }
         
         setSubViewAction?(superViewController:self,childViewController: viewController)
         
-        if self.childViewControllers.contains(viewController) == false {
+        if containsVC == false {
             viewController.didMoveToParentViewController(self)
         }
     }
