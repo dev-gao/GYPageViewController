@@ -10,12 +10,9 @@ import UIKit
 
 extension NSLayoutConstraint {
     func gy_autoRemove() {
-        
         if #available(iOS 8.0, *) {
-            if self.respondsToSelector(Selector("setActive:")) {
-                self.active = false
-                return
-            }
+            self.isActive = false
+            return
         }
         
         if self.secondItem != nil {

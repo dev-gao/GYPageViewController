@@ -17,20 +17,23 @@ class ViewController: UITableViewController ,GYPageViewControllerDataSource, GYP
         
         self.title = "Demo"
         
-        self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "CustomCell")
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "CustomCell")
     }
     
     //MARK: - UITableViewDelegate, UITableViewDataSource
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView,
+                            heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView,
+                            numberOfRowsInSection section: Int) -> Int {
         return 3
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("CustomCell", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView,
+                            cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath as IndexPath)
         if indexPath.row == 0 {
             cell.textLabel?.text = "GYTapPageViewController"
         } else if indexPath.row == 1 {
@@ -43,7 +46,8 @@ class ViewController: UITableViewController ,GYPageViewControllerDataSource, GYP
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView,
+                            didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             var titlesArray:Array<String> = Array<String>()
             var pageControllers:Array<TestChildViewController> = Array<TestChildViewController>()
@@ -54,10 +58,10 @@ class ViewController: UITableViewController ,GYPageViewControllerDataSource, GYP
                 tabVc.pageIndex = i
                 tabVc.view.backgroundColor = UIColor(red: colorStep * CGFloat((i + 1) % 2), green: colorStep * CGFloat((i + 1)  % 3), blue: colorStep * CGFloat((i + 1)  % 5), alpha: 1)
                 
-                let label = UILabel(frame: CGRectMake(100,100,100,100))
-                label.backgroundColor = UIColor.grayColor()
+                let label = UILabel(frame: CGRect(x:100,y:100,width:100,height:100))
+                label.backgroundColor = UIColor.gray
                 label.text = "tab \(i)"
-                label.textAlignment = .Center
+                label.textAlignment = .center
                 tabVc.view.addSubview(label)
                 
                 pageControllers.append(tabVc)
@@ -80,17 +84,17 @@ class ViewController: UITableViewController ,GYPageViewControllerDataSource, GYP
                 tabVc.pageIndex = i
                 tabVc.view.backgroundColor = UIColor(red: colorStep * CGFloat((i + 1) % 2), green: colorStep * CGFloat((i + 1)  % 3), blue: colorStep * CGFloat((i + 1)  % 5), alpha: 1)
                 
-                let label = UILabel(frame: CGRectMake(100,100,100,100))
-                label.backgroundColor = UIColor.grayColor()
+                let label = UILabel(frame: CGRect(x:100,y:100,width:100,height:100))
+                label.backgroundColor = UIColor.gray
                 label.text = "tab \(i)"
-                label.textAlignment = .Center
+                label.textAlignment = .center
                 tabVc.view.addSubview(label)
                 
                 pageControllers.append(tabVc)
             }
             self.pageControllers = pageControllers
             let vc = TestPageViewController(pageTitles: titlesArray, pageControllers: pageControllers)
-            vc.showPageAtIndex(2, animated: false)
+            vc.showPageAtIndex(index: 2, animated: false)
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }

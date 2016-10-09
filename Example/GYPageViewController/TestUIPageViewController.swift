@@ -16,7 +16,7 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
     var selectedIndex:Int = 0
     
     lazy var pageViewController:UIPageViewController = {
-        let pvc = UIPageViewController(transitionStyle: .Scroll, navigationOrientation: .Horizontal, options: nil)
+        let pvc = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         pvc.delegate = self
         pvc.dataSource = self
         return pvc
@@ -37,7 +37,7 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
         self.pageTitles = pageTitles
         if self.pageTitles.count > 1 {
             self.segmentedControl = HMSegmentedControl(sectionTitles: self.pageTitles)
-            self.setupSegmentedControl(self.segmentedControl)
+            self.setupSegmentedControl(segmentedControl: self.segmentedControl)
         }
         
         
@@ -45,9 +45,9 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = UIColor.whiteColor()
+        self.view.backgroundColor = UIColor.white
         
-        self.layoutSegmentedControl(self.segmentedControl)
+        self.layoutSegmentedControl(segmentedControl: self.segmentedControl)
         
         self.addChildViewController(self.pageViewController)
         var newFrame = self.view.frame
@@ -55,7 +55,7 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
         newFrame.origin.y = 108
         self.pageViewController.view.frame = newFrame
         self.view.addSubview(self.pageViewController.view)
-        self.pageViewController.didMoveToParentViewController(self)
+        self.pageViewController.didMove(toParentViewController: self)
         
 //        var constraints = Array<NSLayoutConstraint>()
 //        let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral: .Bottom,.Leading,.Trailing)
@@ -87,11 +87,11 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
             self.view.addSubview(segControl)
             
             var constraints = Array<NSLayoutConstraint>()
-            let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral:.Leading,.Trailing)
+            let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral:.leading,.trailing)
             for attribute in constraintAttributes {
                 let constraint = NSLayoutConstraint(item: segControl,
                                                     attribute: attribute,
-                                                    relatedBy: .Equal,
+                                                    relatedBy: .equal,
                                                     toItem: self.view,
                                                     attribute: attribute,
                                                     multiplier: 1.0,
@@ -100,19 +100,19 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
             }
             
             let topConstraint = NSLayoutConstraint(item: segControl,
-                                                   attribute: .Top,
-                                                   relatedBy: .Equal,
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
                                                    toItem: self.topLayoutGuide,
-                                                   attribute: .Bottom,
+                                                   attribute: .bottom,
                                                    multiplier: 1.0,
                                                    constant: 0)
             constraints.append(topConstraint)
             
             let heightConstraint = NSLayoutConstraint(item: segControl,
-                                                      attribute: .Height,
-                                                      relatedBy: .Equal,
+                                                      attribute: .height,
+                                                      relatedBy: .equal,
                                                       toItem: nil,
-                                                      attribute: .NotAnAttribute,
+                                                      attribute: .notAnAttribute,
                                                       multiplier: 0.0,
                                                       constant: CGFloat(segmentHeight))
             constraints.append(heightConstraint)
@@ -126,41 +126,41 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
             segControl.selectionIndicatorLocation = HMSegmentedControlSelectionIndicatorLocationDown
             segControl.selectionIndicatorColor = UIColor(red: 0xdc/0xff, green: 0xb6/0xff, blue: 0x65/0xff, alpha: 1.0)
             segControl.selectionIndicatorHeight = 3.0
-            segControl.selectedTitleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0xdc/0xff, green: 0xb6/0xff, blue: 0x65/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFontOfSize(22)]
-            segControl.titleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0x84/0xff, green: 0xb0/0xff, blue: 0xdf/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFontOfSize(18)]
+            segControl.selectedTitleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0xdc/0xff, green: 0xb6/0xff, blue: 0x65/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFont(ofSize: 22)]
+            segControl.titleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0x84/0xff, green: 0xb0/0xff, blue: 0xdf/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFont(ofSize: 18)]
             segControl.selectionStyle = HMSegmentedControlSelectionStyleFullWidthStripe
-            segControl.backgroundColor = UIColor.blueColor()
-            segControl.addTarget(self, action: #selector(TestPageViewController.segmentValueChanged), forControlEvents: .ValueChanged)
+            segControl.backgroundColor = UIColor.blue
+            segControl.addTarget(self, action: #selector(TestPageViewController.segmentValueChanged), for: .valueChanged)
         }
     }
     
     @objc private func segmentValueChanged(sender:AnyObject) {
         if let segControl = self.segmentedControl {
-            self.showPageAtIndex(segControl.selectedSegmentIndex, animated: true)
+            self.showPageAtIndex(index: segControl.selectedSegmentIndex, animated: true)
         }
     }
     
     @objc func showPageAtIndex(index:Int,animated:Bool) {
-        var direction:UIPageViewControllerNavigationDirection = .Reverse
+        var direction:UIPageViewControllerNavigationDirection = .reverse
         if let vcs = self.pageViewController.viewControllers {
             if let last = vcs.last {
-                if let index = self.pageControllers.indexOf(last) {
-                    direction = self.selectedIndex > index ? .Forward : .Reverse
+                if let index = self.pageControllers.index(of: last) {
+                    direction = self.selectedIndex > index ? .forward : .reverse
                 }
             }
         }
         
         self.pageViewController.setViewControllers([self.pageControllers[index]], direction: direction, animated: true) { (finished) in
-            dispatch_async(dispatch_get_main_queue(), {
+            DispatchQueue.main.async {
                 self.pageViewController.setViewControllers([self.pageControllers[index]], direction: direction, animated: false) { (finished) in
                     
                 }
-            })
+            }
         }
     }
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
-        var index = self.pageControllers.indexOf(viewController)
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+        var index = self.pageControllers.index(of: viewController)
         if index == NSNotFound || index == 0 {
             return nil
         }
@@ -169,8 +169,8 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
         return self.pageControllers[index!]
     }
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
-        var index = self.pageControllers.indexOf(viewController)
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        var index = self.pageControllers.index(of: viewController)
         if index! == NSNotFound {
             return nil
         }
@@ -183,8 +183,8 @@ class TestPageViewController: UIViewController, UIPageViewControllerDelegate, UI
         return self.pageControllers[index!]
     }
     
-    func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        self.selectedIndex = self.pageControllers.indexOf((pageViewController.viewControllers?.last)!)!
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        self.selectedIndex = self.pageControllers.index(of: (pageViewController.viewControllers?.last)!)!
         self.segmentedControl?.setSelectedSegmentIndex(UInt(self.selectedIndex), animated: true)
     }
 }

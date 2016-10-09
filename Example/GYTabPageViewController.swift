@@ -10,7 +10,7 @@ import UIKit
 import HMSegmentedControl
 
 @objc protocol GYTabPageViewControllerDelegate {
-    optional func pageViewDidSelectedIndex(index:Int)
+    @objc optional func pageViewDidSelectedIndex(_ index:Int)
 }
 
 class GYTabPageViewController: GYPageViewController {
@@ -29,7 +29,7 @@ class GYTabPageViewController: GYPageViewController {
         self.pageTitles = pageTitles
         if self.pageTitles.count > 1 {
             self.segmentedControl = HMSegmentedControl(sectionTitles: self.pageTitles)
-            self.setupSegmentedControl(self.segmentedControl)
+            self.setupSegmentedControl(segmentedControl: self.segmentedControl)
         }
     }
     
@@ -45,28 +45,28 @@ class GYTabPageViewController: GYPageViewController {
         self.resetScrollViewLayoutConstraints(self.scrollView)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
     
     //MARK: - Target & Action
-    @objc private func segmentValueChanged(sender:AnyObject) {
+    @objc fileprivate func segmentValueChanged(_ sender:AnyObject) {
         if let segControl = self.segmentedControl {
             self.showPageAtIndex(segControl.selectedSegmentIndex, animated: true)
         }
     }
     
     //MARK: - Subviews Configuration
-    @objc private func resetScrollViewLayoutConstraints(scrollView:UIScrollView) {
+    @objc fileprivate func resetScrollViewLayoutConstraints(_ scrollView:UIScrollView) {
         scrollView.gy_removeConstraintsAffectingView()
         var constraints = Array<NSLayoutConstraint>()
-        let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral: .Bottom,.Leading,.Trailing)
+        let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral: .bottom,.leading,.trailing)
         
         let topConstraint = NSLayoutConstraint(item: scrollView,
-                                               attribute: .Top,
-                                               relatedBy: .Equal,
+                                               attribute: .top,
+                                               relatedBy: .equal,
                                                toItem: self.segmentedControl,
-                                               attribute: .Bottom,
+                                               attribute: .bottom,
                                                multiplier: 1,
                                                constant: 0)
         constraints.append(topConstraint)
@@ -74,7 +74,7 @@ class GYTabPageViewController: GYPageViewController {
         for attribute in constraintAttributes {
             let constraint = NSLayoutConstraint(item: scrollView,
                                                 attribute: attribute,
-                                                relatedBy: .Equal,
+                                                relatedBy: .equal,
                                                 toItem: self.view,
                                                 attribute: attribute,
                                                 multiplier: 1.0,
@@ -90,45 +90,45 @@ class GYTabPageViewController: GYPageViewController {
             segControl.selectionIndicatorLocation = HMSegmentedControlSelectionIndicatorLocationDown
             segControl.selectionIndicatorColor = UIColor(red: 0xdc/0xff, green: 0xb6/0xff, blue: 0x65/0xff, alpha: 1.0)
             segControl.selectionIndicatorHeight = 3.0
-            segControl.selectedTitleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0xdc/0xff, green: 0xb6/0xff, blue: 0x65/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFontOfSize(22)]
-            segControl.titleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0x84/0xff, green: 0xb0/0xff, blue: 0xdf/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFontOfSize(18)]
+            segControl.selectedTitleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0xdc/0xff, green: 0xb6/0xff, blue: 0x65/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFont(ofSize: 22)]
+            segControl.titleTextAttributes = [NSForegroundColorAttributeName:UIColor(red: 0x84/0xff, green: 0xb0/0xff, blue: 0xdf/0xff, alpha: 1.0),NSFontAttributeName:UIFont.systemFont(ofSize: 18)]
             segControl.selectionStyle = HMSegmentedControlSelectionStyleFullWidthStripe
-            segControl.backgroundColor = UIColor.blueColor()
-            segControl.addTarget(self, action: #selector(GYTabPageViewController.segmentValueChanged), forControlEvents: .ValueChanged)
+            segControl.backgroundColor = UIColor.blue
+            segControl.addTarget(self, action: #selector(GYTabPageViewController.segmentValueChanged), for: .valueChanged)
         }
     }
     
-    @objc private func layoutSegmentedControl(segmentedControl:HMSegmentedControl?) {
+    @objc fileprivate func layoutSegmentedControl(_ segmentedControl:HMSegmentedControl?) {
         if let segControl = segmentedControl {
             self.view.addSubview(segControl)
             
             var constraints = Array<NSLayoutConstraint>()
-            let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral:.Leading,.Trailing)
+            let constraintAttributes = Array<NSLayoutAttribute>(arrayLiteral:.leading,.trailing)
             for attribute in constraintAttributes {
                 let constraint = NSLayoutConstraint(item: segControl,
                                                     attribute: attribute,
-                                                    relatedBy: .Equal,
+                                                    relatedBy: .equal,
                                                     toItem: self.view,
                                                     attribute: attribute,
                                                     multiplier: 1.0,
                                                     constant: 0)
                 constraints.append(constraint)
             }
-
+            
             let topConstraint = NSLayoutConstraint(item: segControl,
-                                                attribute: .Top,
-                                                relatedBy: .Equal,
-                                                toItem: self.topLayoutGuide,
-                                                attribute: .Bottom,
-                                                multiplier: 1.0,
-                                                constant: 0)
+                                                   attribute: .top,
+                                                   relatedBy: .equal,
+                                                   toItem: self.topLayoutGuide,
+                                                   attribute: .bottom,
+                                                   multiplier: 1.0,
+                                                   constant: 0)
             constraints.append(topConstraint)
             
             let heightConstraint = NSLayoutConstraint(item: segControl,
-                                                      attribute: .Height,
-                                                      relatedBy: .Equal,
+                                                      attribute: .height,
+                                                      relatedBy: .equal,
                                                       toItem: nil,
-                                                      attribute: .NotAnAttribute,
+                                                      attribute: .notAnAttribute,
                                                       multiplier: 0.0,
                                                       constant: CGFloat(segmentHeight))
             constraints.append(heightConstraint)
@@ -139,14 +139,14 @@ class GYTabPageViewController: GYPageViewController {
     //MARK: - Override super class methods
     
     // Sent when a gesture-initiated transition ends.
-    @objc override func gy_pageViewControllerDidTransitonFrom(fromIndex:Int, toIndex:Int)
+    @objc override func gy_pageViewControllerDidTransitonFrom(_ fromIndex:Int, toIndex:Int)
     {
         super.gy_pageViewControllerDidTransitonFrom(fromIndex, toIndex: toIndex)
         self.segmentedControl?.setSelectedSegmentIndex(UInt(toIndex), animated: true)
     }
     
     // Sent after method(func showPageAtIndex(index:Int,animated:Bool)) finished.
-    @objc override func gy_pageViewControllerDidShow(fromIndex:Int, toIndex:Int, finished:Bool)
+    @objc override func gy_pageViewControllerDidShow(_ fromIndex:Int, toIndex:Int, finished:Bool)
     {
         super.gy_pageViewControllerDidShow(fromIndex, toIndex:toIndex, finished:finished)
         self.segmentedControl?.setSelectedSegmentIndex(UInt(toIndex), animated: true )

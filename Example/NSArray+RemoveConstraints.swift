@@ -9,17 +9,17 @@
 import UIKit
 
 extension NSArray {
-
+    
     func gy_autoRemoveConstraints() {
         if #available(iOS 8.0, *) {
-            if NSLayoutConstraint.respondsToSelector(#selector(NSLayoutConstraint.deactivateConstraints)) {
-                NSLayoutConstraint.deactivateConstraints(self as! [NSLayoutConstraint])
+            if NSLayoutConstraint.responds(to: #selector(NSLayoutConstraint.deactivate(_:))) {
+                NSLayoutConstraint.deactivate(self as! [NSLayoutConstraint])
                 return
             }
         }
         
         for object in self {
-            if object.isKindOfClass(NSLayoutConstraint.self) {
+            if (object as AnyObject).isKind(of: NSLayoutConstraint.self) {
                 (object as! NSLayoutConstraint).gy_autoRemove()
             }
         }

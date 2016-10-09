@@ -9,11 +9,11 @@
 import UIKit
 
 extension UIViewController {
-    func gy_addChildViewController(viewController:UIViewController) {
+    func gy_addChildViewController(_ viewController:UIViewController) {
         self.gy_addChildViewController(viewController,frame: self.view.bounds)
     }
     
-    func gy_addChildViewController(viewController:UIViewController,inView:UIView,withFrame:CGRect) {
+    func gy_addChildViewController(_ viewController:UIViewController,inView:UIView,withFrame:CGRect) {
         self.gy_addChildViewController(viewController) { (superViewController,childViewController) in
             childViewController.view.frame = withFrame;
             
@@ -23,7 +23,7 @@ extension UIViewController {
         }
     }
     
-    func gy_addChildViewController(viewController:UIViewController,frame:CGRect) {
+    func gy_addChildViewController(_ viewController:UIViewController,frame:CGRect) {
         self.gy_addChildViewController(viewController) { (superViewController,childViewController) in
             childViewController.view.frame = frame;
             
@@ -32,29 +32,30 @@ extension UIViewController {
             }
         }
     }
-
-    func gy_addChildViewController(viewController:UIViewController,
-                                   setSubViewAction:((superViewController:UIViewController,childViewController:UIViewController) -> Void)?) {
+    
+    func gy_addChildViewController(_ viewController:UIViewController,
+                                   setSubViewAction:((_ superViewController:UIViewController,_ childViewController:UIViewController) -> Void)?) {
+        
         let containsVC = self.childViewControllers.contains(viewController)
         
         if containsVC == false {
             self.addChildViewController(viewController)
         }
         
-        setSubViewAction?(superViewController:self,childViewController: viewController)
+        setSubViewAction?(self,viewController)
         
         if containsVC == false {
-            viewController.didMoveToParentViewController(self)
+            viewController.didMove(toParentViewController: self)
         }
     }
     
     func gy_removeFromParentViewControllerOnly() {
-        self.willMoveToParentViewController(nil)
+        self.willMove(toParentViewController: nil)
         self.removeFromParentViewController()
     }
     
     func gy_removeFromParentViewController() {
-        self.willMoveToParentViewController(nil)
+        self.willMove(toParentViewController: nil)
         self.view.removeFromSuperview()
         self.removeFromParentViewController()
     }

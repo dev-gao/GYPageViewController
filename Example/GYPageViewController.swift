@@ -7,10 +7,30 @@
 //
 
 import UIKit
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+    switch (lhs, rhs) {
+    case let (l?, r?):
+        return l < r
+    case (nil, _?):
+        return true
+    default:
+        return false
+    }
+}
+
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+    switch (lhs, rhs) {
+    case let (l?, r?):
+        return l > r
+    default:
+        return rhs < lhs
+    }
+}
+
 
 enum GYPageScrollDirection {
-    case Left
-    case Right
+    case left
+    case right
 }
 
 @objc protocol GYPageViewControllerDataSource {
@@ -23,43 +43,43 @@ enum GYPageScrollDirection {
 @objc protocol GYPageViewControllerDelegate {
     
     // Sent when a gesture-initiated transition begins.
-    optional func gy_pageViewController(pageViewController: GYPageViewController,
-                                        willTransitonFrom fromVC:UIViewController,
-                                                          toViewController toVC:UIViewController)
+    @objc optional func gy_pageViewController(_ pageViewController: GYPageViewController,
+                                              willTransitonFrom fromVC:UIViewController,
+                                              toViewController toVC:UIViewController)
     
     // Sent when a gesture-initiated transition ends.
-    optional func gy_pageViewController(pageViewController: GYPageViewController,
-                                        didTransitonFrom fromVC:UIViewController,
-                                                         toViewController toVC:UIViewController)
+    @objc optional func gy_pageViewController(_ pageViewController: GYPageViewController,
+                                              didTransitonFrom fromVC:UIViewController,
+                                              toViewController toVC:UIViewController)
     
     
     // Sent when method(func showPageAtIndex(index:Int,animated:Bool)) begin to be called.
-    optional func gy_pageViewController(pageViewController: GYPageViewController,
-                                        willLeaveViewController fromVC:UIViewController,
-                                                                toViewController toVC:UIViewController,
-                                                                                 animated:Bool)
+    @objc optional func gy_pageViewController(_ pageViewController: GYPageViewController,
+                                              willLeaveViewController fromVC:UIViewController,
+                                              toViewController toVC:UIViewController,
+                                              animated:Bool)
     
     // Sent after method(func showPageAtIndex(index:Int,animated:Bool)) finished.
-    optional func gy_pageViewController(pageViewController: GYPageViewController,
-                                        didLeaveViewController fromVC:UIViewController,
-                                                               toViewController toVC:UIViewController,
-                                                                                finished:Bool)
+    @objc optional func gy_pageViewController(_ pageViewController: GYPageViewController,
+                                              didLeaveViewController fromVC:UIViewController,
+                                              toViewController toVC:UIViewController,
+                                              finished:Bool)
 }
 
 class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDelegate {
     weak var delegate:GYPageViewControllerDelegate?
     weak var dataSource:GYPageViewControllerDataSource?
     
-    private(set) var scrollView:UIScrollView! = UIScrollView()
+    fileprivate(set) var scrollView:UIScrollView! = UIScrollView()
     var pageCount:Int {
         get {
             return self.dataSource!.numberOfControllers(self)
         }
     }
-    private(set) var currentPageIndex = 0
-    var contentEdgeInsets = UIEdgeInsetsZero
-    private lazy var memCache:NSCache = {
-        let cache = NSCache()
+    fileprivate(set) var currentPageIndex = 0
+    var contentEdgeInsets = UIEdgeInsets.zero
+    fileprivate lazy var memCache:NSCache<NSNumber, UIViewController> = {
+        let cache = NSCache<NSNumber, UIViewController>()
         cache.countLimit = 3
         return cache
     }()
@@ -73,34 +93,34 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         }
     }
     
-    private var childsToClean = Set<UIViewController>()
+    fileprivate var childsToClean = Set<UIViewController>()
     
-    private var originOffset = 0.0                  //用于手势拖动scrollView时，判断方向
-    private var guessToIndex = -1                   //用于手势拖动scrollView时，判断要去的页面
-    private var lastSelectedIndex = 0               //用于记录上次选择的index
-    private var firstWillAppear = true              //用于界定页面首次WillAppear。
-    private var firstDidAppear = true               //用于界定页面首次DidAppear。
-    private var firstDidLayoutSubViews = true       //用于界定页面首次DidLayoutsubviews。
-    private var firstWillLayoutSubViews = true      //用于界定页面首次WillLayoutsubviews。
-    private var isDecelerating = false              //正在减速操作
+    fileprivate var originOffset = 0.0                  //用于手势拖动scrollView时，判断方向
+    fileprivate var guessToIndex = -1                   //用于手势拖动scrollView时，判断要去的页面
+    fileprivate var lastSelectedIndex = 0               //用于记录上次选择的index
+    fileprivate var firstWillAppear = true              //用于界定页面首次WillAppear。
+    fileprivate var firstDidAppear = true               //用于界定页面首次DidAppear。
+    fileprivate var firstDidLayoutSubViews = true       //用于界定页面首次DidLayoutsubviews。
+    fileprivate var firstWillLayoutSubViews = true      //用于界定页面首次WillLayoutsubviews。
+    fileprivate var isDecelerating = false              //正在减速操作
     
     //MARK: - Lift Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = UIColor.whiteColor()
+        self.view.backgroundColor = UIColor.white
         self.memCache.delegate = self
         
         self.configScrollView(self.scrollView)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if self.firstWillAppear {
             //Config init page
             self.gy_pageViewControllerWillShow(self.lastSelectedIndex, toIndex: self.currentPageIndex, animated: false)
             self.delegate?.gy_pageViewController?(self, willLeaveViewController: self.controllerAtIndex(self.lastSelectedIndex), toViewController: self.controllerAtIndex(self.currentPageIndex), animated: false)
-//            print("viewWillAppear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
+            //            print("viewWillAppear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
             self.firstWillAppear = false
         }
         self.controllerAtIndex(self.currentPageIndex).beginAppearanceTransition(true, animated: true)
@@ -116,25 +136,25 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
             //Solve scrollView bug: can scroll to negative offset when pushing a UIViewController containing a UIScrollView using a UINavigationController.
             if let navigationController = self.navigationController {
                 if navigationController.viewControllers[navigationController.viewControllers.count - 1] == self{
-                    self.scrollView.contentOffset = CGPointZero;
-                    self.scrollView.contentInset = UIEdgeInsetsZero;
+                    self.scrollView.contentOffset = CGPoint.zero;
+                    self.scrollView.contentInset = UIEdgeInsets.zero;
                 }
             }
             
             // Solve iOS7 crash: scrollView setContentOffset will trigger layout subviews methods. Use GCD dispatch_after to update scrollView contentOffset.
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.0 * Float(NSEC_PER_SEC))), dispatch_get_main_queue(), {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(0.0 * Float(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: {
                 self.updateScrollViewLayoutIfNeeded()
                 self.updateScrollViewDisplayIndexIfNeeded()
             })
             self.firstDidLayoutSubViews = false
         } else {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.0 * Float(NSEC_PER_SEC))), dispatch_get_main_queue(), {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(0.0 * Float(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: {
                 self.updateScrollViewLayoutIfNeeded()
             })
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if self.firstDidAppear {
             //            print("viewDidAppear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
@@ -147,13 +167,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         self.controllerAtIndex(self.currentPageIndex).endAppearanceTransition()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.controllerAtIndex(self.currentPageIndex).beginAppearanceTransition(false, animated: true)
         //        print("viewWillDisappear beginAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         self.controllerAtIndex(self.currentPageIndex).endAppearanceTransition()
         //        print("viewDidDisappear endAppearanceTransition  self.currentPageIndex  \(self.currentPageIndex)")
@@ -178,7 +198,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
      - parameter index:    change to index
      - parameter animated: animation bool. true to animate, false not animate
      */
-    @objc func showPageAtIndex(index:Int,animated:Bool) {
+    @objc func showPageAtIndex(_ index:Int,animated:Bool) {
         if index < 0 || index >= self.pageCount {
             return
         }
@@ -243,10 +263,10 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                 if self.lastSelectedIndex != self.currentPageIndex {
                     // Define variables
                     let pageSize = self.scrollView.frame.size
-                    let direction = (self.lastSelectedIndex < self.currentPageIndex) ? GYPageScrollDirection.Right : GYPageScrollDirection.Left
-                    let lastView = self.controllerAtIndex(self.lastSelectedIndex).view
-                    let currentView = self.controllerAtIndex(self.currentPageIndex).view
-                    let oldSelectView = self.controllerAtIndex(oldSelectedIndex).view
+                    let direction = (self.lastSelectedIndex < self.currentPageIndex) ? GYPageScrollDirection.right : GYPageScrollDirection.left
+                    let lastView:UIView = self.controllerAtIndex(self.lastSelectedIndex).view
+                    let currentView:UIView = self.controllerAtIndex(self.currentPageIndex).view
+                    let oldSelectView:UIView = self.controllerAtIndex(oldSelectedIndex).view
                     let duration = 0.3
                     let backgroundIndex = self.calcIndexWithOffset(Float(self.scrollView.contentOffset.x),
                                                                    width: Float(self.scrollView.frame.size.width))
@@ -265,7 +285,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                             tmpView != lastView
                         {
                             backgroundView = tmpView
-                            backgroundView?.hidden = true
+                            backgroundView?.isHidden = true
                         }
                     }
                     
@@ -279,22 +299,22 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                     self.moveBackToOriginPositionIfNeeded(oldSelectView, index: oldSelectedIndex)
                     
                     // Bring the views for simulating scroll animation to front and make them visible
-                    self.scrollView.bringSubviewToFront(lastView)
-                    self.scrollView.bringSubviewToFront(currentView)
-                    lastView.hidden = false
-                    currentView.hidden = false
+                    self.scrollView.bringSubview(toFront: lastView)
+                    self.scrollView.bringSubview(toFront: currentView)
+                    lastView.isHidden = false
+                    currentView.isHidden = false
                     
                     // Calculate start positions , animate to positions , end positions for simulating animation views(lastView, currentView)
                     let lastView_StartOrigin = lastView.frame.origin
                     var currentView_StartOrigin = lastView.frame.origin
-                    if direction == .Right {
+                    if direction == .right {
                         currentView_StartOrigin.x += self.scrollView.frame.size.width
                     } else {
                         currentView_StartOrigin.x -= self.scrollView.frame.size.width
                     }
                     
                     var lastView_AnimateToOrigin = lastView.frame.origin
-                    if direction == .Right {
+                    if direction == .right {
                         lastView_AnimateToOrigin.x -= self.scrollView.frame.size.width
                     } else {
                         lastView_AnimateToOrigin.x += self.scrollView.frame.size.width
@@ -308,23 +328,23 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                      *  Simulate scroll animation
                      *  Bring two views(lastView, currentView) to front and simulate scroll in neighbouring position.
                      */
-                    lastView.frame = CGRectMake(lastView_StartOrigin.x, lastView_StartOrigin.y, pageSize.width, pageSize.height)
-                    currentView.frame = CGRectMake(currentView_StartOrigin.x, currentView_StartOrigin.y, pageSize.width, pageSize.height)
+                    lastView.frame = CGRect(x: lastView_StartOrigin.x, y: lastView_StartOrigin.y, width: pageSize.width, height: pageSize.height)
+                    currentView.frame = CGRect(x: currentView_StartOrigin.x, y: currentView_StartOrigin.y, width: pageSize.width, height: pageSize.height)
                     
-                    UIView.animateWithDuration(duration,
-                                               delay: 0.0,
-                                               options: .CurveEaseInOut,
-                                               animations:
+                    UIView.animate(withDuration: duration,
+                                   delay: 0.0,
+                                   options: UIViewAnimationOptions(),
+                                   animations:
                         {
-                            lastView.frame = CGRectMake(lastView_AnimateToOrigin.x, lastView_AnimateToOrigin.y, pageSize.width, pageSize.height)
-                            currentView.frame = CGRectMake(currentView_AnimateToOrigin.x, currentView_AnimateToOrigin.y, pageSize.width, pageSize.height)
+                            lastView.frame = CGRect(x: lastView_AnimateToOrigin.x, y: lastView_AnimateToOrigin.y, width: pageSize.width, height: pageSize.height)
+                            currentView.frame = CGRect(x: currentView_AnimateToOrigin.x, y: currentView_AnimateToOrigin.y, width: pageSize.width, height: pageSize.height)
                         },
-                                               completion:
+                                   completion:
                         { [weak self] (finished) in
                             if finished {
-                                lastView.frame = CGRectMake(lastView_EndOrigin.x, lastView_EndOrigin.y, pageSize.width, pageSize.height)
-                                currentView.frame = CGRectMake(currentView_EndOrigin.x, currentView_EndOrigin.y, pageSize.width, pageSize.height)
-                                backgroundView?.hidden = false
+                                lastView.frame = CGRect(x: lastView_EndOrigin.x, y: lastView_EndOrigin.y, width: pageSize.width, height: pageSize.height)
+                                currentView.frame = CGRect(x: currentView_EndOrigin.x, y: currentView_EndOrigin.y, width: pageSize.width, height: pageSize.height)
+                                backgroundView?.isHidden = false
                                 if let weakSelf = self {
                                     weakSelf.moveBackToOriginPositionIfNeeded(currentView, index: weakSelf.currentPageIndex)
                                     weakSelf.moveBackToOriginPositionIfNeeded(lastView, index: weakSelf.lastSelectedIndex)
@@ -347,7 +367,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         }
     }
     
-    @objc private func moveBackToOriginPositionIfNeeded(view:UIView?,index:Int)
+    @objc fileprivate func moveBackToOriginPositionIfNeeded(_ view:UIView?,index:Int)
     {
         if index < 0 || index >= self.pageCount {
             return
@@ -366,18 +386,18 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         }
     }
     
-    @objc private func calcVisibleViewControllerFrameWith(index:Int) -> CGRect {
+    @objc fileprivate func calcVisibleViewControllerFrameWith(_ index:Int) -> CGRect {
         var offsetX = 0.0
         offsetX = Double(index) * Double(self.scrollView.frame.size.width)
-        return CGRectMake(CGFloat(offsetX), 0, self.scrollView.frame.size.width, self.scrollView.frame.size.height)
+        return CGRect(x: CGFloat(offsetX), y: 0, width: self.scrollView.frame.size.width, height: self.scrollView.frame.size.height)
     }
     
-    @objc private func addVisibleViewContorllerWith(index:Int) {
+    @objc fileprivate func addVisibleViewContorllerWith(_ index:Int) {
         if index < 0 || index > self.pageCount {
             return
         }
         
-        var vc:UIViewController? = self.memCache.objectForKey(index) as? UIViewController
+        var vc:UIViewController? = self.memCache.object(forKey: NSNumber(value: index))
         if vc == nil {
             vc = self.controllerAtIndex(index)
         }
@@ -386,13 +406,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         self.gy_addChildViewController(vc!,
                                        inView: self.scrollView,
                                        withFrame: childViewFrame)
-//        print("------------------------t1- add \(index)")
-        self.memCache.setObject(self.controllerAtIndex(index), forKey: index)
+        //        print("------------------------t1- add \(index)")
+        self.memCache.setObject(self.controllerAtIndex(index), forKey: NSNumber(value: index))
         
-//        print("------------------------t2- add \(index)")
+        //        print("------------------------t2- add \(index)")
     }
     
-    @objc private func updateScrollViewDisplayIndexIfNeeded() {
+    @objc fileprivate func updateScrollViewDisplayIndexIfNeeded() {
         if self.scrollView.frame.size.width > 0.0 {
             self.addVisibleViewContorllerWith(self.currentPageIndex)
             let newOffset = self.calcOffsetWithIndex(
@@ -410,7 +430,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     }
     
     // Do not use it in viewDidLayoutSubviews on ios 7 device.
-    @objc private func updateScrollViewLayoutIfNeeded() {
+    @objc fileprivate func updateScrollViewLayoutIfNeeded() {
         if self.scrollView.frame.size.width > 0.0 {
             let width = CGFloat(self.pageCount) * self.scrollView.frame.size.width
             let height = self.scrollView.frame.size.height
@@ -418,13 +438,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
             if width != oldContentSize.width ||
                 height != oldContentSize.height
             {
-                self.scrollView.contentSize = CGSizeMake(width, height)
+                self.scrollView.contentSize = CGSize(width: width, height: height)
             }
         }
     }
     
     //MARK: - Helper methods
-    @objc private func calcOffsetWithIndex(index:Int,width:Float,maxWidth:Float) -> CGPoint {
+    @objc fileprivate func calcOffsetWithIndex(_ index:Int,width:Float,maxWidth:Float) -> CGPoint {
         var offsetX = Float(Float(index) * width)
         
         if offsetX < 0 {
@@ -437,10 +457,10 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
             offsetX = maxWidth - width
         }
         
-        return CGPointMake(CGFloat(offsetX),0)
+        return CGPoint(x: CGFloat(offsetX),y: 0)
     }
     
-    @objc private func calcIndexWithOffset(offset:Float,width:Float) -> Int {
+    @objc fileprivate func calcIndexWithOffset(_ offset:Float,width:Float) -> Int {
         var startIndex = Int(offset/width)
         
         if startIndex < 0 {
@@ -450,53 +470,53 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         return startIndex
     }
     
-    @objc private func controllerAtIndex(index:NSInteger) -> UIViewController
+    @objc fileprivate func controllerAtIndex(_ index:NSInteger) -> UIViewController
     {
         return self.dataSource!.gy_pageViewController(self, controllerAtIndex:index);
     }
     
-    @objc private func cleanCacheToClean() {
+    @objc fileprivate func cleanCacheToClean() {
         let currentPage = self.controllerAtIndex(self.currentPageIndex)
         if self.childsToClean.contains(currentPage) {
-            if let removeIndex = self.childsToClean.indexOf(currentPage) {
-                self.childsToClean.removeAtIndex(removeIndex)
-                self.memCache.setObject(currentPage, forKey: self.currentPageIndex)
+            if let removeIndex = self.childsToClean.index(of: currentPage) {
+                self.childsToClean.remove(at: removeIndex)
+                self.memCache.setObject(currentPage, forKey: NSNumber(value: self.currentPageIndex))
             }
         }
         
         for vc in self.childsToClean {
-//            print("-21-  clean cache index \((vc as! TestChildViewController).pageIndex)")
+            //            print("-21-  clean cache index \((vc as! TestChildViewController).pageIndex)")
             vc.gy_removeFromParentViewController()
         }
         self.childsToClean.removeAll()
         
-//        print("-31- remain111 ==============================>")
-//        for vcc in self.childViewControllers {
-//            print("remain \((vcc as! TestChildViewController).pageIndex)")
-//        }
-//        print("-31- remain111 ==============================>")
+        //        print("-31- remain111 ==============================>")
+        //        for vcc in self.childViewControllers {
+        //            print("remain \((vcc as! TestChildViewController).pageIndex)")
+        //        }
+        //        print("-31- remain111 ==============================>")
     }
     
     //MARK: - Subviews Configuration
-    @objc private func configScrollView(scrollView:UIScrollView) {
+    @objc fileprivate func configScrollView(_ scrollView:UIScrollView) {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.delegate = self
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.showsVerticalScrollIndicator = false
-        scrollView.pagingEnabled = true
-        scrollView.backgroundColor = UIColor.clearColor()
+        scrollView.isPagingEnabled = true
+        scrollView.backgroundColor = UIColor.clear
         scrollView.scrollsToTop = false
         
         self.view.addSubview(scrollView)
         
         var constraints = Array<NSLayoutConstraint>()
-        let constraintAttributesDic:Dictionary<NSLayoutAttribute,CGFloat> = [.Leading:self.contentEdgeInsets.left,
-                                                                             .Trailing:self.contentEdgeInsets.right]
+        let constraintAttributesDic:Dictionary<NSLayoutAttribute,CGFloat> = [.leading:self.contentEdgeInsets.left,
+                                                                             .trailing:self.contentEdgeInsets.right]
         
         for attribute in constraintAttributesDic.keys {
             let constraint = NSLayoutConstraint(item: scrollView,
                                                 attribute: attribute,
-                                                relatedBy: .Equal,
+                                                relatedBy: .equal,
                                                 toItem: self.view,
                                                 attribute: attribute,
                                                 multiplier: 1.0,
@@ -505,19 +525,19 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         }
         
         let topConstraint = NSLayoutConstraint(item: scrollView,
-                                               attribute: .Top,
-                                               relatedBy: .Equal,
+                                               attribute: .top,
+                                               relatedBy: .equal,
                                                toItem: self.topLayoutGuide,
-                                               attribute: .Bottom,
+                                               attribute: .bottom,
                                                multiplier: 1.0,
                                                constant: self.contentEdgeInsets.top)
         constraints.append(topConstraint)
         
         let bottomConstraint = NSLayoutConstraint(item: scrollView,
-                                                  attribute: .Bottom,
-                                                  relatedBy: .Equal,
+                                                  attribute: .bottom,
+                                                  relatedBy: .equal,
                                                   toItem: self.bottomLayoutGuide,
-                                                  attribute: .Top,
+                                                  attribute: .top,
                                                   multiplier: 1.0,
                                                   constant: self.contentEdgeInsets.bottom)
         constraints.append(bottomConstraint)
@@ -526,12 +546,12 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     }
     
     //MARK: - NSCacheDelegate
-    func cache(cache: NSCache, willEvictObject obj: AnyObject) {
-        if obj.isKindOfClass(UIViewController.self) {
+    func cache(_ cache: NSCache<AnyObject, AnyObject>, willEvictObject obj: Any) {
+        if (obj as AnyObject).isKind(of: UIViewController.self) {
             let vc = obj as! UIViewController
-//            print("-1- to remove from cache \((vc as! TestChildViewController).pageIndex)")
+            //            print("-1- to remove from cache \((vc as! TestChildViewController).pageIndex)")
             if self.childViewControllers.contains(vc) {
-//                print("============================tracking \(scrollView.tracking)  dragging \(scrollView.dragging) decelerating \(scrollView.decelerating)")
+                //                print("============================tracking \(scrollView.tracking)  dragging \(scrollView.dragging) decelerating \(scrollView.decelerating)")
                 
                 let AddCacheToCleanIfNeed = { (midIndex:Int) -> Void in
                     //Modify memCache through showPageAtIndex.
@@ -555,50 +575,50 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                 }
                 
                 // When scrollView's dragging, tracking and decelerating are all false.At least it means the cache eviction is not triggered by continuous interaction page changing.
-                if self.scrollView.dragging == false &&
-                   self.scrollView.tracking == false &&
-                   self.scrollView.decelerating == false
+                if self.scrollView.isDragging == false &&
+                    self.scrollView.isTracking == false &&
+                    self.scrollView.isDecelerating == false
                 {
                     let lastPage = self.controllerAtIndex(self.lastSelectedIndex)
                     let currentPage = self.controllerAtIndex(self.currentPageIndex)
                     if lastPage == vc || currentPage == vc {
                         self.childsToClean.insert(vc)
                     }
-//                    print("self.currentPageIndex  \(self.currentPageIndex)")
-                } else if self.scrollView.dragging == true
+                    //                    print("self.currentPageIndex  \(self.currentPageIndex)")
+                } else if self.scrollView.isDragging == true
                 {
                     AddCacheToCleanIfNeed(self.guessToIndex)
-//                    print("self.guessToIndex  \(self.guessToIndex)")
+                    //                    print("self.guessToIndex  \(self.guessToIndex)")
                 }
                 
                 if self.childsToClean.count > 0 {
                     return
                 }
                 
-//                print("-2- remove index : \((vc as! TestChildViewController).pageIndex)")
+                //                print("-2- remove index : \((vc as! TestChildViewController).pageIndex)")
                 vc.gy_removeFromParentViewController()
-//                print("-3- remain ==============================>")
-//                for vcc in self.childViewControllers {
-//                    print("remain \((vcc as! TestChildViewController).pageIndex)")
-//                }
-//                print("-3- remain ==============================>")
+                //                print("-3- remain ==============================>")
+                //                for vcc in self.childViewControllers {
+                //                    print("remain \((vcc as! TestChildViewController).pageIndex)")
+                //                }
+                //                print("-3- remain ==============================>")
             }
         }
     }
     
     //MARK: - UIScrollViewDelegate
     // any offset changes
-    func scrollViewDidScroll(scrollView: UIScrollView) {
-//        print("tracking \(scrollView.tracking)  dragging \(scrollView.dragging) decelerating \(scrollView.decelerating)")
-        if scrollView.tracking == true &&
-           scrollView.decelerating == true
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        //        print("tracking \(scrollView.tracking)  dragging \(scrollView.dragging) decelerating \(scrollView.decelerating)")
+        if scrollView.isTracking == true &&
+            scrollView.isDecelerating == true
         {
-//            print("     guessToIndex  \(guessToIndex)   self.currentPageIndex  \(self.currentPageIndex)")
+            //            print("     guessToIndex  \(guessToIndex)   self.currentPageIndex  \(self.currentPageIndex)")
         }
         
-        if scrollView.dragging == true && scrollView == self.scrollView {
+        if scrollView.isDragging == true && scrollView == self.scrollView {
             let offset = scrollView.contentOffset.x
-            let width = CGRectGetWidth(scrollView.frame)
+            let width = scrollView.frame.width
             let lastGuessIndex = self.guessToIndex < 0 ? self.currentPageIndex : self.guessToIndex
             if self.originOffset < Double(offset) {
                 self.guessToIndex = Int(ceil((offset)/width))
@@ -606,13 +626,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                 self.guessToIndex = Int(floor((offset)/width))
             } else {}
             let maxCount = self.pageCount
-    
+            
             
             // 1.Decelerating is false when first drag during discontinuous interaction.
             // 2.Decelerating is true when drag during continuous interaction.
             if (guessToIndex != self.currentPageIndex &&
-                self.scrollView.decelerating == false) ||
-                self.scrollView.decelerating == true
+                self.scrollView.isDecelerating == false) ||
+                self.scrollView.isDecelerating == true
             {
                 if lastGuessIndex != self.guessToIndex &&
                     self.guessToIndex >= 0 &&
@@ -649,13 +669,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     }
     
     // called on finger up as we are moving
-    func scrollViewWillBeginDecelerating(scrollView: UIScrollView) {
+    func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
         //        print("====  BeginDecelerating dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
         self.isDecelerating = true
     }
     
     // called when scroll view grinds to a halt
-    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let newIndex = self.calcIndexWithOffset(Float(scrollView.contentOffset.x),
                                                 width: Float(scrollView.frame.size.width))
         let oldIndex = self.currentPageIndex
@@ -693,8 +713,8 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     }
     
     // called on start of dragging (may require some time and or distance to move)
-    func scrollViewWillBeginDragging(scrollView: UIScrollView) {
-        if scrollView.decelerating == false {
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if scrollView.isDecelerating == false {
             self.originOffset = Double(scrollView.contentOffset.x)
             self.guessToIndex = self.currentPageIndex
         }
@@ -702,13 +722,13 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     }
     
     // called on finger up if the user dragged. velocity is in points/millisecond. targetContentOffset may be changed to adjust where the scroll view comes to rest
-    func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-//                print("====  WillEndDragging: \(velocity)  targetContentOffset: \(targetContentOffset.memory)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)  velocity  \(velocity)")
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        //                print("====  WillEndDragging: \(velocity)  targetContentOffset: \(targetContentOffset.memory)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)  velocity  \(velocity)")
         
-        if scrollView.decelerating == true {
+        if scrollView.isDecelerating == true {
             // Update originOffset for calculating new guessIndex to add controller.
             let offset = scrollView.contentOffset.x
-            let width = CGRectGetWidth(scrollView.frame)
+            let width = scrollView.frame.width
             if velocity.x > 0 { // to right page
                 self.originOffset = Double(floor(offset/width)) * Double(width)
             } else if velocity.x < 0 {// to left page
@@ -718,30 +738,30 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     }
     
     // called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
-    func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         //        print("====  DidEndDragging: \(decelerate)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
     }
     
     // called when setContentOffset/scrollRectVisible:animated: finishes. not called if not animating
-    func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         //        print("====  DidEndScrollingAnimation: dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
     }
     
-    override func shouldAutomaticallyForwardAppearanceMethods() -> Bool {
+    override var shouldAutomaticallyForwardAppearanceMethods : Bool {
         return false
     }
     
     //MARK: - Method to be override in subclass
     
     // Sent when a gesture-initiated transition begins.
-    func gy_pageViewControllerWillTransitonFrom(fromIndex:Int, toIndex:Int) { }
+    func gy_pageViewControllerWillTransitonFrom(_ fromIndex:Int, toIndex:Int) { }
     
     // Sent when a gesture-initiated transition ends.
-    func gy_pageViewControllerDidTransitonFrom(fromIndex:Int, toIndex:Int) { }
+    func gy_pageViewControllerDidTransitonFrom(_ fromIndex:Int, toIndex:Int) { }
     
     // Sent when method(func showPageAtIndex(index:Int,animated:Bool)) begin to be called.
-    func gy_pageViewControllerWillShow(fromIndex:Int, toIndex:Int, animated:Bool) { }
+    func gy_pageViewControllerWillShow(_ fromIndex:Int, toIndex:Int, animated:Bool) { }
     
     // Sent after method(func showPageAtIndex(index:Int,animated:Bool)) finished.
-    func gy_pageViewControllerDidShow(fromIndex:Int, toIndex:Int, finished:Bool) { }
+    func gy_pageViewControllerDidShow(_ fromIndex:Int, toIndex:Int, finished:Bool) { }
 }
