@@ -665,7 +665,7 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
                 }
             }
         }
-        //        print("====  DidScroll dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+        print("====  DidScroll dragging:  \(scrollView.isDragging)  decelorating: \(scrollView.isDecelerating)  offset:\(scrollView.contentOffset)")
     }
     
     // called on finger up as we are moving
@@ -676,6 +676,60 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
     
     // called when scroll view grinds to a halt
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        self.updatePageViewAfterTragging(scrollView: scrollView)
+        //print("====  DidEndDecelerating  dragging:  \(scrollView.isDragging)  decelorating: \(scrollView.isDecelerating)  offset:\(scrollView.contentOffset)")
+    }
+    
+    // called on start of dragging (may require some time and or distance to move)
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if scrollView.isDecelerating == false {
+            self.originOffset = Double(scrollView.contentOffset.x)
+            self.guessToIndex = self.currentPageIndex
+        }
+        //        print("====  WillBeginDragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+    }
+    
+    // called on finger up if the user dragged. velocity is in points/millisecond. targetContentOffset may be changed to adjust where the scroll view comes to rest
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        //                print("====  WillEndDragging: \(velocity)  targetContentOffset: \(targetContentOffset.memory)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)  velocity  \(velocity)")
+        
+        if scrollView.isDecelerating == true {
+            // Update originOffset for calculating new guessIndex to add controller.
+            let offset = scrollView.contentOffset.x
+            let width = scrollView.frame.width
+            if velocity.x > 0 { // to right page
+                self.originOffset = Double(floor(offset/width)) * Double(width)
+            } else if velocity.x < 0 {// to left page
+                self.originOffset = Double(ceil(offset/width)) * Double(width)
+            }
+        }
+        
+        //print("will end tragging  tracking \(scrollView.isTracking)  dragging \(scrollView.isDragging) decelerating \(scrollView.isDecelerating)")
+        
+        // 如果松手时位置，刚好不需要decelerating。则主动调用刷新page。
+        let offset = scrollView.contentOffset.x
+        let scrollViewWidth = scrollView.frame.size.width
+        if (Int(offset * 100) % Int(scrollViewWidth * 100)) == 0 {
+            self.updatePageViewAfterTragging(scrollView: scrollView)
+        }
+    }
+    
+    // called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        //        print("====  DidEndDragging: \(decelerate)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+    }
+    
+    // called when setContentOffset/scrollRectVisible:animated: finishes. not called if not animating
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        //        print("====  DidEndScrollingAnimation: dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
+    }
+    
+    override var shouldAutomaticallyForwardAppearanceMethods : Bool {
+        return false
+    }
+    
+    //MARK: - Update page after tragging
+    func updatePageViewAfterTragging(scrollView:UIScrollView) {
         let newIndex = self.calcIndexWithOffset(Float(scrollView.contentOffset.x),
                                                 width: Float(scrollView.frame.size.width))
         let oldIndex = self.currentPageIndex
@@ -706,49 +760,9 @@ class GYPageViewController: UIViewController, UIScrollViewDelegate, NSCacheDeleg
         self.gy_pageViewControllerDidShow(self.guessToIndex, toIndex: self.currentPageIndex, finished:true)
         self.delegate?.gy_pageViewController?(self, didTransitonFrom: self.controllerAtIndex(self.guessToIndex),
                                               toViewController: self.controllerAtIndex(self.currentPageIndex))
-        //        print("====  DidEndDecelerating  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
         self.isDecelerating = false
         
         self.cleanCacheToClean()
-    }
-    
-    // called on start of dragging (may require some time and or distance to move)
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        if scrollView.isDecelerating == false {
-            self.originOffset = Double(scrollView.contentOffset.x)
-            self.guessToIndex = self.currentPageIndex
-        }
-        //        print("====  WillBeginDragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
-    }
-    
-    // called on finger up if the user dragged. velocity is in points/millisecond. targetContentOffset may be changed to adjust where the scroll view comes to rest
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        //                print("====  WillEndDragging: \(velocity)  targetContentOffset: \(targetContentOffset.memory)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)  velocity  \(velocity)")
-        
-        if scrollView.isDecelerating == true {
-            // Update originOffset for calculating new guessIndex to add controller.
-            let offset = scrollView.contentOffset.x
-            let width = scrollView.frame.width
-            if velocity.x > 0 { // to right page
-                self.originOffset = Double(floor(offset/width)) * Double(width)
-            } else if velocity.x < 0 {// to left page
-                self.originOffset = Double(ceil(offset/width)) * Double(width)
-            }
-        }
-    }
-    
-    // called on finger up if the user dragged. decelerate is true if it will continue moving afterwards
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        //        print("====  DidEndDragging: \(decelerate)  dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
-    }
-    
-    // called when setContentOffset/scrollRectVisible:animated: finishes. not called if not animating
-    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        //        print("====  DidEndScrollingAnimation: dragging:  \(scrollView.dragging)  decelorating: \(scrollView.decelerating)  offset:\(scrollView.contentOffset)")
-    }
-    
-    override var shouldAutomaticallyForwardAppearanceMethods : Bool {
-        return false
     }
     
     //MARK: - Method to be override in subclass
